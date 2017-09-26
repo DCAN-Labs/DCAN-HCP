@@ -59,6 +59,7 @@ Usage() {
   echo ""
   echo "            [--topupconfig=<topup config file>]"
   echo "            [--gdcoeffs=<gradient distortion coefficients (SIEMENS file)>]"
+  echo "            --useT2=<false if T2w image unavailable or of poor quality, else default=true>"
 }
 
 # function for parsing options
@@ -133,21 +134,26 @@ DistortionCorrection=`getopt1 "--method" $@`
 TopupConfig=`getopt1 "--topupconfig" $@`  
 GradientDistortionCoeffs=`getopt1 "--gdcoeffs" $@`  
 UseJacobian=`getopt1 "--usejacobian" $@`
+useT2=`getopt1 "--useT2" $@`
 
 # default parameters
 WD=`defaultopt $WD .`
 
 T1wImage=`${FSLDIR}/bin/remove_ext $T1wImage`
 T1wImageBrain=`${FSLDIR}/bin/remove_ext $T1wImageBrain`
+if $useT2; then
 T2wImage=`${FSLDIR}/bin/remove_ext $T2wImage`
 T2wImageBrain=`${FSLDIR}/bin/remove_ext $T2wImageBrain`
+fi
 
 T1wImageBrainBasename=`basename "$T1wImageBrain"`
 T1wImageBasename=`basename "$T1wImage"`
+if $useT2; then
 T2wImageBrainBasename=`basename "$T2wImageBrain"`
 T2wImageBasename=`basename "$T2wImage"`
+fi
 
-Modalities="T1w T2w"
+if $useT2; then Modalities="T1w T2w"; else Modalities="T1w"; fi
 
 echo " "
 echo " START: ${SCRIPT_NAME}"
@@ -321,7 +327,7 @@ done
 
 ### END LOOP over modalities ###
 
-
+if $useT2; then
 ### Now do T2w to T1w registration
 mkdir -p ${WD}/T2w2T1w
     
@@ -342,6 +348,7 @@ ${FSLDIR}/bin/fslmaths ${WD}/T2w2T1w/T2w_reg -mul ${T1wImage} -sqrt ${WD}/T2w2T1
 # Copy files to specified destinations
 ${FSLDIR}/bin/imcp ${WD}/T2w2T1w/T2w_dc_reg ${OutputT2wTransform}
 ${FSLDIR}/bin/imcp ${WD}/T2w2T1w/T2w_reg ${OutputT2wImage}
+fi
 
 echo " "
 echo " END: ${SCRIPT_NAME}"
@@ -351,12 +358,16 @@ echo " END: `date`" >> $WD/log.txt
 
 if [ -e $WD/qa.txt ] ; then rm -f $WD/qa.txt ; fi
 echo "cd `pwd`" >> $WD/qa.txt
+if $useT2; then
 echo "# View registration result of corrected T2w to corrected T1w image: showing both images + sqrt(T1w*T2w)" >> $WD/qa.txt
 echo "fslview ${OutputT1wImage} ${OutputT2wImage} ${WD}/T2w2T1w/sqrtT1wbyT2w" >> $WD/qa.txt
+fi
 echo "# Compare pre- and post-distortion correction for T1w" >> $WD/qa.txt
 echo "fslview ${T1wImage} ${OutputT1wImage}" >> $WD/qa.txt
+if $useT2; then
 echo "# Compare pre- and post-distortion correction for T2w" >> $WD/qa.txt
 echo "fslview ${T2wImage} ${WD}/${T2wImageBasename}" >> $WD/qa.txt
+fi
 
 ##############################################################################################
 

@@ -41,6 +41,7 @@ Jacobian="${36}"
 ReferenceMyelinMaps="${37}"
 CorrectionSigma="${38}"
 RegName="${39}"
+useT2="${40}"
 
 echo "CreateMyelinMaps.sh: RegName: ${RegName}"
 
@@ -58,8 +59,10 @@ ${CARET7DIR}/wb_command -volume-palette $Jacobian MODE_AUTO_SCALE -interpolate t
 convertwarp --relout --rel --ref="$T1wImageBrain" --premat="$InitialT1wTransform" --warp1="$dcT1wTransform" --out="$OutputOrigT1wToT1w"
 convertwarp --relout --rel --ref="$T1wImageBrain" --warp1="$OutputOrigT1wToT1w" --warp2="$AtlasTransform" --out="$OutputOrigT1wToStandard"
 
+if $useT2; then
 convertwarp --relout --rel --ref="$T1wImageBrain" --premat="$InitialT2wTransform" --warp1="$dcT2wTransform" --postmat="$FinalT2wTransform" --out="$OutputOrigT2wToT1w"
 convertwarp --relout --rel --ref="$T1wImageBrain" --warp1="$OutputOrigT2wToT1w" --warp2="$AtlasTransform" --out="$OutputOrigT2wToStandard"
+fi
 
 applywarp --rel --interp=spline -i "$OrginalT1wImage" -r "$T1wImageBrain" -w "$OutputOrigT1wToT1w" -o "$OutputT1wImage"
 fslmaths "$OutputT1wImage" -abs "$OutputT1wImage" -odt float
@@ -74,6 +77,7 @@ fslmaths "$OutputMNIT1wImage" -abs "$OutputMNIT1wImage" -odt float
 fslmaths "$OutputMNIT1wImage" -div "$BiasFieldOutput" "$OutputMNIT1wImageRestore"
 fslmaths "$OutputMNIT1wImageRestore" -mas "$T1wMNIImageBrain" "$OutputMNIT1wImageRestoreBrain"
 
+if $useT2; then
 applywarp --rel --interp=spline -i "$OrginalT2wImage" -r "$T1wImageBrain" -w "$OutputOrigT2wToT1w" -o "$OutputT2wImage"
 fslmaths "$OutputT2wImage" -abs "$OutputT2wImage" -odt float
 fslmaths "$OutputT2wImage" -div "$BiasField" "$OutputT2wImageRestore"
@@ -183,5 +187,8 @@ for STRING in "$T1wFolder"/"$NativeFolder"@"$AtlasSpaceFolder"/"$NativeFolder"@n
     ${CARET7DIR}/wb_command -add-to-spec-file "$FolderI"/"$Subject"."$Mesh".wb.spec INVALID "$FolderII"/"$Subject"."$Map"."$Mesh"."$Ext".nii
   done
 done
+else
+    echo -e "\n Skipping most of CreateMyelingMaps because useT2=false. Only used to create BiasField.nii.gz AP 20162111"
+fi
 
 echo -e "\n END: CreateMyelinMaps"

@@ -321,6 +321,15 @@ RUN=`opts_GetOpt1 "--printcom" $@`
 UseJacobian="$(echo ${UseJacobian} | tr '[:upper:]' '[:lower:]')"
 UseJacobian=`opts_DefaultOpt $UseJacobian "true"`
 
+# useT2 flag added for excluding or include T2w image in processing AP 20162111
+# Any line that requires the T2 should be encapsulated in an if-then statement and skipped if useT2=false
+useT2=`opts_GetOpt1 "--useT2" $@`
+
+# usemask flag added for determining whether to use the masked brain image to improve registration EF 20170330
+# Any line that requires the T2 should be encapsulated in an if-then statement and skipped if usemask=false
+usemask=`opts_GetOpt1 "--usemask" $@`
+
+
 # ------------------------------------------------------------------------------
 #  Show Command Line Options
 # ------------------------------------------------------------------------------
@@ -356,6 +365,8 @@ log_Msg "AvgrdcSTRING: ${AvgrdcSTRING}"
 log_Msg "TopupConfig: ${TopupConfig}"
 log_Msg "BiasFieldSmoothingSigma: ${BiasFieldSmoothingSigma}"
 log_Msg "UseJacobian: ${UseJacobian}"
+log_Msg "useT2: ${useT2}"
+log_Msg "usemask: ${usemask}"
 
 # ------------------------------------------------------------------------------
 #  Show Environment Variables
@@ -369,31 +380,41 @@ log_Msg "HCPPIPEDIR_PreFS: ${HCPPIPEDIR_PreFS}"
 # Naming Conventions
 T1wImage="T1w"
 T1wFolder="T1w" #Location of T1w images
+if $useT2; then
 T2wImage="T2w" 
 T2wFolder="T2w" #Location of T2w images
+fi
 AtlasSpaceFolder="MNINonLinear"
 
 # Build Paths
-T1wFolder=${StudyFolder}/${Subject}/${T1wFolder} 
-T2wFolder=${StudyFolder}/${Subject}/${T2wFolder} 
+T1wFolder=${StudyFolder}/${Subject}/${T1wFolder}
+if $useT2; then
+T2wFolder=${StudyFolder}/${Subject}/${T2wFolder}
+fi
 AtlasSpaceFolder=${StudyFolder}/${Subject}/${AtlasSpaceFolder}
 
 log_Msg "T1wFolder: $T1wFolder"
+if $useT2; then
 log_Msg "T2wFolder: $T2wFolder"
+fi
 log_Msg "AtlasSpaceFolder: $AtlasSpaceFolder"
 
 # Unpack List of Images
 T1wInputImages=`echo ${T1wInputImages} | sed 's/@/ /g'`
+if $useT2; then
 T2wInputImages=`echo ${T2wInputImages} | sed 's/@/ /g'`
+fi
 
 if [ ! -e ${T1wFolder}/xfms ] ; then
     log_Msg "mkdir -p ${T1wFolder}/xfms/"
     mkdir -p ${T1wFolder}/xfms/
 fi
 
+if $useT2; then
 if [ ! -e ${T2wFolder}/xfms ] ; then
 	log_Msg "mkdir -p ${T2wFolder}/xfms/"
     mkdir -p ${T2wFolder}/xfms/
+fi
 fi
 
 if [ ! -e ${AtlasSpaceFolder}/xfms ] ; then
@@ -417,7 +438,7 @@ log_Msg "POSIXLY_CORRECT="${POSIXLY_CORRECT}
 #  - Perform Brain Extraction(FNIRT-based Masking)
 # ------------------------------------------------------------------------------
 
-Modalities="T1w T2w"
+if $useT2; then Modalities="T1w T2w"; else Modalities="T1w"; fi
 
 for TXw in ${Modalities} ; do
     log_Msg "Processing Modality: " $TXw
@@ -525,14 +546,14 @@ done
 case $AvgrdcSTRING in 
     
     ${FIELDMAP_METHOD_OPT} | ${SPIN_ECHO_METHOD_OPT} | ${GENERAL_ELECTRIC_METHOD_OPT} | ${SIEMENS_METHOD_OPT})
-
+        if ${useT2}; then TXwFolder=${T2wFolder}; else TXwFolder=${T1wFolder}; fi
         log_Msg "Performing ${AvgrdcSTRING} Readout Distortion Correction"
-        wdir=${T2wFolder}/T2wToT1wDistortionCorrectAndReg
+        wdir=${TXwFolder}/T2wToT1wDistortionCorrectAndReg
         if [ -d ${wdir} ] ; then
             # DO NOT change the following line to "rm -r ${wdir}" because the 
             # chances of something going wrong with that are much higher, and 
             # rm -r always needs to be treated with the utmost caution
-            rm -r ${T2wFolder}/T2wToT1wDistortionCorrectAndReg
+            rm -r ${TXwFolder}/T2wToT1wDistortionCorrectAndReg
         fi
 
         log_Msg "mkdir -p ${wdir}"
@@ -563,13 +584,15 @@ case $AvgrdcSTRING in
             --method=${AvgrdcSTRING} \
             --topupconfig=${TopupConfig} \
             --gdcoeffs=${GradientDistortionCoeffs} \
-            --usejacobian=${UseJacobian}
+            --usejacobian=${UseJacobian} \
+            --useT2=${useT2}
 
         ;;
 
     *) 
 
         log_Msg "NOT PERFORMING READOUT DISTORTION CORRECTION"
+        if ${useT2}; then
         wdir=${T2wFolder}/T2wToT1wReg
         if [ -e ${wdir} ] ; then
             # DO NOT change the following line to "rm -r ${wdir}" because the
@@ -592,6 +615,14 @@ case $AvgrdcSTRING in
             ${T1wFolder}/xfms/${T1wImage}_dc \
             ${T1wFolder}/${T2wImage}_acpc_dc \
             ${T1wFolder}/xfms/${T2wImage}_reg_dc
+        else
+            log_Msg "Skipping T2wToT1wReg.sh - Copying T1w_acpc to T1w_acpc_dc"
+            # Copying undistorted image to dc - Anders Perrone 20170123
+            ${FSLDIR}/bin/imcp ${T1wFolder}/${T1wImage}_acpc ${T1wFolder}/${T1wImage}_acpc_dc
+            ${FSLDIR}/bin/imcp ${T1wFolder}/${T1wImage}_acpc_brain ${T1wFolder}/${T1wImage}_acpc_dc_brain
+            ${FSLDIR}/bin/fslmerge -t ${T1wFolder}/xfms/${T1wImage}_dc ${T1wFolder}/${T1wImage}_acpc ${T1wFolder}/${T1wImage}_acpc ${T1wFolder}/${T1wImage}_acpc
+            ${FSLDIR}/bin/fslmaths ${T1wFolder}/xfms/${T1wImage}_dc -mul 0 ${T1wFolder}/xfms/${T1wImage}_dc
+        fi
 
 esac
 
@@ -601,6 +632,7 @@ esac
 # ------------------------------------------------------------------------------
 
 log_Msg "Performing Bias Field Correction"
+if $useT2; then
 if [ ! -z ${BiasFieldSmoothingSigma} ] ; then
     BiasFieldSmoothingSigma="--bfsigma=${BiasFieldSmoothingSigma}"
 fi 
@@ -619,10 +651,17 @@ ${RUN} ${HCPPIPEDIR_PreFS}/BiasFieldCorrection_sqrtT1wXT1w.sh \
     --oT2im=${T1wFolder}/${T2wImage}_acpc_dc_restore \
     --oT2brain=${T1wFolder}/${T2wImage}_acpc_dc_restore_brain \
     ${BiasFieldSmoothingSigma}
-
+else
+    log_Msg "useT2=false: Running FAST to do BiasFieldCorrection. Note:${T1wImage}_acpc_dc_restore is brain extracted"
+    fast -b -B -o ${T1wFolder}/T1w_fast -t 1 ${T1wFolder}/T1w_acpc_dc_brain.nii.gz
+    imcp ${T1wFolder}/T1w_fast_bias ${T1wFolder}/BiasField_acpc_dc
+    imcp ${T1wFolder}/T1w_fast_restore ${T1wFolder}/${T1wImage}_acpc_dc_restore_brain
+    imcp ${T1wFolder}/T1w_fast_restore ${T1wFolder}/${T1wImage}_acpc_dc_restore #FAST does not output a non-brain extracted image, so use the brain extracted as the full image AP 20162111
+fi
 # ------------------------------------------------------------------------------
 #  Atlas Registration to MNI152: FLIRT + FNIRT  
 #  Also applies registration to T1w and T2w images 
+#  Modified 20170330 by EF to include the option for a native mask in registration
 # ------------------------------------------------------------------------------
 
 log_Msg "Performing Atlas Registration to MNI152 (FLIRT and FNIRT)"
@@ -648,7 +687,10 @@ ${RUN} ${HCPPIPEDIR_PreFS}/AtlasRegistrationToMNI152_FLIRTandFNIRT.sh \
     --ot2=${AtlasSpaceFolder}/${T2wImage} \
     --ot2rest=${AtlasSpaceFolder}/${T2wImage}_restore \
     --ot2restbrain=${AtlasSpaceFolder}/${T2wImage}_restore_brain \
-    --fnirtconfig=${FNIRTConfig}
+    --fnirtconfig=${FNIRTConfig} \
+    --useT2=${useT2} \
+    --T1wFolder=${T1wFolder} \
+    --usemask=${usemask}
 
 log_Msg "Completed"
 

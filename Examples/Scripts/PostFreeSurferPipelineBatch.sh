@@ -77,7 +77,7 @@ PRINTCOM=""
 
 ######################################### DO WORK ##########################################
 
-
+useT2=${useT2:-true} # sets the useT2 flag default to "true" - AP 20162111
 for Subject in $Subjlist ; do
   echo $Subject
 
@@ -92,6 +92,12 @@ for Subject in $Subjlist ; do
   ReferenceMyelinMaps="${HCPPIPEDIR_Templates}/standard_mesh_atlases/Conte69.MyelinMap_BC.164k_fs_LR.dscalar.nii"
   # RegName="MSMSulc" #MSMSulc is recommended, if binary is not available use FS (FreeSurfer)
   RegName="FS" 
+  
+  ############################ ABIDE FIX ######################################
+  T1wTemplate2mm="${HCPPIPEDIR_Templates}/MNI152_T1_2mm.nii.gz" # DS 20170420
+  Template2mmMask="${HCPPIPEDIR_Templates}/MNI152_T1_2mm_brain_mask_dil.nii.gz" 
+  FNIRTConfig="${HCPPIPEDIR_Config}/T1_2_MNI152_2mm.cnf"
+  #############################################################################
 
   if [ -n "${command_line_specified_run_local}" ] ; then
       echo "About to run ${HCPPIPEDIR}/PostFreeSurfer/PostFreeSurferPipeline.sh"
@@ -113,6 +119,10 @@ for Subject in $Subjlist ; do
       --freesurferlabels="$FreeSurferLabels" \
       --refmyelinmaps="$ReferenceMyelinMaps" \
       --regname="$RegName" \
+      --useT2="$useT2" \
+      --reference2mm="$T1wTemplate2mm" \
+      --reference2mmmask="$Template2mmMask" \
+      --config="$FNIRTConfig" \
       --printcom=$PRINTCOM
 
   # The following lines are used for interactive debugging to set the positional parameters: $1 $2 $3 ...
@@ -128,6 +138,10 @@ for Subject in $Subjlist ; do
       --freesurferlabels="$FreeSurferLabels" \
       --refmyelinmaps="$ReferenceMyelinMaps" \
       --regname="$RegName" \
+      --reference2mm="$T1wTemplate2mm" \
+      --reference2mmmask="$Template2mmMask" \
+      --config="$FNIRTConfig" \
+      --useT2="$useT2" \
       --printcom=$PRINTCOM"
       
    echo ". ${EnvironmentScript}"

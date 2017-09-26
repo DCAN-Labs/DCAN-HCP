@@ -76,7 +76,7 @@ PRINTCOM=""
 #Scripts called by this script do assume they run on the outputs of the PreFreeSurfer Pipeline
 
 ######################################### DO WORK ##########################################
-
+useT2=${useT2} # sets the useT2 flag default to "true" - AP 20162111
 for Subject in $Subjlist ; do
   echo $Subject
 
@@ -101,15 +101,17 @@ for Subject in $Subjlist ; do
       --t1="$T1wImage" \
       --t1brain="$T1wImageBrain" \
       --t2="$T2wImage" \
-      --printcom=$PRINTCOM
-      
-  # The following lines are used for interactive debugging to set the positional parameters: $1 $2 $3 ...
+      --useT2="$useT2" \
+      --printcom=$PRINTCOM 
+  
+    # The following lines are used for interactive debugging to set the positional parameters: $1 $2 $3 ...
 
   echo "set -- --subject="$Subject" \
       --subjectDIR="$SubjectDIR" \
       --t1="$T1wImage" \
       --t1brain="$T1wImageBrain" \
       --t2="$T2wImage" \
+      --useT2="$usetT2" \
       --printcom=$PRINTCOM"
 
   echo ". ${EnvironmentScript}"

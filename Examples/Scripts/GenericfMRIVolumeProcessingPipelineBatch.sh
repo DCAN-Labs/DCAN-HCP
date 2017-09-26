@@ -198,6 +198,7 @@ if [ "${nTaskArray}" -ne "${nPhaseEncodingArray}" ] ; then
 fi
 
 # Start or launch pipeline processing for each subject
+useT2=${useT2:-true} # sets the useT2 flag default to "true" - AP 20162111
 for Subject in $Subjlist ; do
   echo $Subject
 
@@ -261,7 +262,8 @@ for Subject in $Subjlist ; do
       --topupconfig=$TopUpConfig \
       --printcom=$PRINTCOM \
       --biascorrection=$BiasCorrection \
-      --mctype=${MCType}
+      --mctype=${MCType} \
+      --useT2=${useT2} \
 
   # The following lines are used for interactive debugging to set the positional parameters: $1 $2 $3 ...
 
@@ -284,7 +286,8 @@ for Subject in $Subjlist ; do
       --topupconfig=$TopUpConfig \
       --printcom=$PRINTCOM \
       --biascorrection=$BiasCorrection \
-      --mctype=${MCType}"
+      --mctype=${MCType}" \
+      --useT2=$useT2
 
   echo ". ${EnvironmentScript}"
 	

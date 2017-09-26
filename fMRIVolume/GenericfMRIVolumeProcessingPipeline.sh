@@ -109,6 +109,9 @@ dof=`opts_GetOpt1 "--dof" $@`
 dof=`opts_DefaultOpt $dof 6`
 log_Msg "dof: ${dof}"
 
+useT2=`opts_GetOpt1 "--useT2" $@`
+log_Msg "useT2: ${useT2}"
+
 RUN=`opts_GetOpt1 "--printcom" $@`  # use ="echo" for just printing everything and not running the commands (default is to run)
 log_Msg "RUN: ${RUN}"
 
@@ -338,7 +341,8 @@ ${RUN} ${PipelineScripts}/DistortionCorrectionAndEPIToT1wReg_FLIRTBBRAndFreeSurf
     --fmriname=${NameOffMRI} \
     --subjectfolder=${SubjectFolder} \
     --biascorrection=${BiasCorrection} \
-    --usejacobian=${UseJacobian}
+    --usejacobian=${UseJacobian} \
+    --useT2=${useT2}
     
 #One Step Resampling
 log_Msg "One Step Resampling"

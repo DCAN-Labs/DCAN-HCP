@@ -212,6 +212,8 @@ main()
 	# DO WORK
 
 	# Cycle through specified subjects
+    useT2=${useT2:-true} # sets the useT2 flag default to "true" - AP 20162111
+    usemask=${usemask:-false} # sets the usemask falg default to "false" - EF 20170330
 	for Subject in $Subjlist ; do
 		echo $Subject
 
@@ -219,7 +221,7 @@ main()
 
 		# Detect Number of T1w Images and build list of full paths to 
 		# T1w images
-		numT1ws=`ls ${StudyFolder}/${Subject}/unprocessed/3T | grep 'T1w_MPR.$' | wc -l`
+		numT1ws=`ls ${StudyFolder}/${Subject}/unprocessed/3T | grep 'T1w_MPR' | wc -l` #removed .$ from 'T1w_MPR.$' AP 20161129
 		echo "Found ${numT1ws} T1w Images for subject ${Subject}"
 		T1wInputImages=""
 		i=1
@@ -227,10 +229,11 @@ main()
 			T1wInputImages=`echo "${T1wInputImages}${StudyFolder}/${Subject}/unprocessed/3T/T1w_MPR${i}/${Subject}_3T_T1w_MPR${i}.nii.gz@"`
 			i=$(($i+1))
 		done
-
+        
+        if $useT2; then
 		# Detect Number of T2w Images and build list of full paths to
 		# T2w images
-		numT2ws=`ls ${StudyFolder}/${Subject}/unprocessed/3T | grep 'T2w_SPC.$' | wc -l`
+		numT2ws=`ls ${StudyFolder}/${Subject}/unprocessed/3T | grep 'T2w_SPC' | wc -l` #removed .$ from 'T2w_SPC.$' - AP 20161129
 		echo "Found ${numT2ws} T2w Images for subject ${Subject}"
 		T2wInputImages=""
 		i=1
@@ -238,6 +241,7 @@ main()
 			T2wInputImages=`echo "${T2wInputImages}${StudyFolder}/${Subject}/unprocessed/3T/T2w_SPC${i}/${Subject}_3T_T2w_SPC${i}.nii.gz@"`
 			i=$(($i+1))
 		done
+        fi
 
 		# Readout Distortion Correction:
 		#
@@ -381,7 +385,8 @@ main()
 
 		# Lowres T1w MNI template
 		T1wTemplate2mm="${HCPPIPEDIR_Templates}/MNI152_T1_2mm.nii.gz" 
-
+        
+        if $useT2; then
 		# Hires T2w MNI Template
 		T2wTemplate="${HCPPIPEDIR_Templates}/MNI152_T2_0.7mm.nii.gz" 
 
@@ -390,6 +395,7 @@ main()
 
 		# Lowres T2w MNI Template
 		T2wTemplate2mm="${HCPPIPEDIR_Templates}/MNI152_T2_2mm.nii.gz" 
+        fi
 
 		# Hires MNI brain mask template
 		TemplateMask="${HCPPIPEDIR_Templates}/MNI152_T1_0.7mm_brain_mask.nii.gz"
@@ -415,9 +421,11 @@ main()
 
 		# DICOM field (0019,1018) in s or "NONE" if not used
 		T1wSampleSpacing="0.0000074" 
-
+        
+        if $useT2; then
 		# DICOM field (0019,1018) in s or "NONE" if not used
 		T2wSampleSpacing="0.0000021" 
+        fi
 
 		# z appears to be the appropriate polarity for the 3D structurals collected on Siemens scanners
 		# or "NONE" if not used
@@ -447,7 +455,7 @@ main()
 		fi
 
 		# Run (or submit to be run) the PreFreeSurferPipeline.sh script
-		# with all the specified parameter values
+		# with all the specified parameter values -- modified by EF on 20170330 for usemask flag
 
 		${queuing_command} ${HCPPIPEDIR}/PreFreeSurfer/PreFreeSurferPipeline.sh \
 			--path="$StudyFolder" \
@@ -478,6 +486,8 @@ main()
 			--gdcoeffs="$GradientDistortionCoeffs" \
 			--avgrdcmethod="$AvgrdcSTRING" \
 			--topupconfig="$TopupConfig" \
+            --useT2="$useT2" \
+            --usemask="$usemask" \
 			--printcom=$PRINTCOM
 		
 	done

@@ -53,6 +53,7 @@ T1wImage=`opts_GetOpt1 "--t1" $@` #T1w FreeSurfer Input (Full Resolution)
 T1wImageBrain=`opts_GetOpt1 "--t1brain" $@` 
 T2wImage=`opts_GetOpt1 "--t2" $@` #T2w FreeSurfer Input (Full Resolution)
 recon_all_seed=`opts_GetOpt1 "--seed" $@`
+useT2=`opts_GetOpt1 "--useT2" $@` #AP 20162111
 
 # ------------------------------------------------------------------------------
 #  Show Command Line Options
@@ -65,6 +66,7 @@ log_Msg "T1wImage: ${T1wImage}"
 log_Msg "T1wImageBrain: ${T1wImageBrain}"
 log_Msg "T2wImage: ${T2wImage}"
 log_Msg "recon_all_seed: ${recon_all_seed}"
+log_Msg "useT2: ${useT2}"
 
 # figure out whether to include a random seed generator seed in all the recon-all command lines
 seed_cmd_appendix=""
@@ -141,6 +143,33 @@ fslmaths "$T1wImageFile"_1mm.nii.gz -div $Mean -mul 150 -abs "$T1wImageFile"_1mm
 #Initial Recon-all Steps
 log_Msg "Initial Recon-all Steps"
 
+# FAIR LAB PRE RECON-ALL STEPS # Added by Eric Earl 12/20/2016, folder check and permissions part added 1/9/2017
+FastFileInputOutputDIR=/mnt/scratch/fnl_lab
+if [ ! -d ${FastFileInputOutputDIR} ] ; then
+    mkdir -p ${FastFileInputOutputDIR}
+    chown :fnl_lab ${FastFileInputOutputDIR}
+    chmod 770 ${FastFileInputOutputDIR}
+fi
+RandomHash=`cat /dev/urandom | tr -cd 'a-f0-9' | head -c 16`
+TempSubjectDIR="$FastFileInputOutputDIR"/"$RandomHash"
+mkdir -p $TempSubjectDIR
+
+# Call recon-all with flags that are part of "-autorecon1", with the exception of -skullstrip.
+# -skullstrip of FreeSurfer not reliable for Phase II data because of poor FreeSurfer mri_em_register registrations with Skull on, 
+# so run registration with PreFreeSurfer masked data and then generate brain mask as usual.
+#recon-all -i "$T1wImageFile"_1mm.nii.gz -subjid $SubjectID -sd $SubjectDIR -motioncor -talairach -nuintensitycor -normalization ${seed_cmd_appendix} # ORIGINAL RECON-ALL STEP
+recon-all -i "$T1wImageFile"_1mm.nii.gz -subjid $SubjectID -sd $TempSubjectDIR -motioncor -talairach -nuintensitycor -normalization ${seed_cmd_appendix} # FAIR LAB RECON-ALL STEP # Replaced by Eric Earl 12/20/2016
+
+# FAIR LAB POST RECON-ALL STEPS # Added by Eric Earl 12/20/2016
+mv "$TempSubjectDIR"/"$SubjectID" $SubjectDIR/
+rm -rf $TempSubjectDIR
+
+# Generate brain mask
+mri_convert "$T1wImageBrainFile"_1mm.nii.gz "$SubjectDIR"/"$SubjectID"/mri/brainmask.mgz --conform
+mri_em_register -mask "$SubjectDIR"/"$SubjectID"/mri/brainmask.mgz "$SubjectDIR"/"$SubjectID"/mri/nu.mgz $FREESURFER_HOME/average/RB_all_2008-03-26.gca "$SubjectDIR"/"$SubjectID"/mri/transforms/talairach_with_skull.lta
+mri_watershed -T1 -brain_atlas $FREESURFER_HOME/average/RB_all_withskull_2008-03-26.gca "$SubjectDIR"/"$SubjectID"/mri/transforms/talairach_with_skull.lta "$SubjectDIR"/"$SubjectID"/mri/T1.mgz "$SubjectDIR"/"$SubjectID"/mri/brainmask.auto.mgz 
+cp "$SubjectDIR"/"$SubjectID"/mri/brainmask.auto.mgz "$SubjectDIR"/"$SubjectID"/mri/brainmask.mgz 
+
 # Both the SGE and PBS cluster schedulers use the environment variable NSLOTS to indicate the number of cores
 # a job will use.  If this environment variable is set, we will use it to determine the number of cores to
 # tell recon-all to use.
@@ -152,31 +181,22 @@ else
     num_cores="${NSLOTS}"
 fi
 
-# Call recon-all with flags that are part of "-autorecon1", with the exception of -skullstrip.
-# -skullstrip of FreeSurfer not reliable for Phase II data because of poor FreeSurfer mri_em_register registrations with Skull on, 
-# so run registration with PreFreeSurfer masked data and then generate brain mask as usual.
-recon-all -i "$T1wImageFile"_1mm.nii.gz -subjid $SubjectID -sd $SubjectDIR -motioncor -talairach -nuintensitycor -normalization -openmp ${num_cores} ${seed_cmd_appendix}
-
-# Generate brain mask
-mri_convert "$T1wImageBrainFile"_1mm.nii.gz "$SubjectDIR"/"$SubjectID"/mri/brainmask.mgz --conform
-mri_em_register -mask "$SubjectDIR"/"$SubjectID"/mri/brainmask.mgz "$SubjectDIR"/"$SubjectID"/mri/nu.mgz $FREESURFER_HOME/average/RB_all_2008-03-26.gca "$SubjectDIR"/"$SubjectID"/mri/transforms/talairach_with_skull.lta
-mri_watershed -T1 -brain_atlas $FREESURFER_HOME/average/RB_all_withskull_2008-03-26.gca "$SubjectDIR"/"$SubjectID"/mri/transforms/talairach_with_skull.lta "$SubjectDIR"/"$SubjectID"/mri/T1.mgz "$SubjectDIR"/"$SubjectID"/mri/brainmask.auto.mgz 
-cp "$SubjectDIR"/"$SubjectID"/mri/brainmask.auto.mgz "$SubjectDIR"/"$SubjectID"/mri/brainmask.mgz 
-
 # Call recon-all to run most of the "-autorecon2" stages, but turning off smooth2, inflate2, curvstats, and segstats stages
 recon-all -subjid $SubjectID -sd $SubjectDIR -autorecon2 -nosmooth2 -noinflate2 -nocurvstats -nosegstats -openmp ${num_cores} ${seed_cmd_appendix}
 
 #Highres white stuff and Fine Tune T2w to T1w Reg
 log_Msg "High resolution white matter and fine tune T2w to T1w registration"
-"$PipelineScripts"/FreeSurferHiresWhite.sh "$SubjectID" "$SubjectDIR" "$T1wImage" "$T2wImage"
+"$PipelineScripts"/FreeSurferHiresWhite.sh "$SubjectID" "$SubjectDIR" "$T1wImage" "$T2wImage" "$useT2"
 
 #Intermediate Recon-all Steps
 log_Msg "Intermediate Recon-all Steps"
 recon-all -subjid $SubjectID -sd $SubjectDIR -smooth2 -inflate2 -curvstats -sphere -surfreg -jacobian_white -avgcurv -cortparc -openmp ${num_cores} ${seed_cmd_appendix}
 
+if $useT2; then
 #Highres pial stuff (this module adjusts the pial surface based on the the T2w image)
 log_Msg "High Resolution pial surface"
 "$PipelineScripts"/FreeSurferHiresPial.sh "$SubjectID" "$SubjectDIR" "$T1wImage" "$T2wImage"
+fi
 
 #Final Recon-all Steps
 log_Msg "Final Recon-all Steps"

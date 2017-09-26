@@ -6,6 +6,7 @@ SubjectID="$1"
 SubjectDIR="$2"
 T1wImage="$3" #T1w FreeSurfer Input (Full Resolution)
 T2wImage="$4" #T2w FreeSurfer Input (Full Resolution)
+useT2="$5"
 
 export SUBJECTS_DIR="$SubjectDIR"
 
@@ -89,6 +90,7 @@ echo "0 0 1 0" >> "$mridir"/transforms/eye.dat
 echo "0 0 0 1" >> "$mridir"/transforms/eye.dat
 echo "round" >> "$mridir"/transforms/eye.dat
 
+if $useT2; then #allow generation of eye.dat (ident matrix) necessary for fMRIVol AP 20162111
 if [ ! -e "$mridir"/transforms/T2wtoT1w.mat ] ; then
   bbregister --s "$SubjectID" --mov "$T2wImage" --surf white.deformed --init-reg "$mridir"/transforms/eye.dat --t2 --reg "$mridir"/transforms/T2wtoT1w.dat --o "$mridir"/T2w_hires.nii.gz
   tkregister2 --noedit --reg "$mridir"/transforms/T2wtoT1w.dat --mov "$T2wImage" --targ "$mridir"/T1w_hires.nii.gz --fslregout "$mridir"/transforms/T2wtoT1w.mat
@@ -99,6 +101,7 @@ else
   echo "Warning Reruning FreeSurfer Pipeline"
   echo "T2w to T1w Registration Will Not Be Done Again"
   echo "Verify that "$T2wImage" has not been fine tuned and then remove "$mridir"/transforms/T2wtoT1w.mat"
+fi
 fi
 
 # Create version of white surfaces back in the 1mm (FS conformed) space
