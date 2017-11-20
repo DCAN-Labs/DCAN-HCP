@@ -27,6 +27,10 @@ get_batch_options() {
                 command_line_specified_run_local="TRUE"
                 index=$(( index + 1 ))
                 ;;
+            --task=*)
+                command_line_specified_task=${argument#*=}
+                index=$(( index + 1 ))
+                ;;
 	    *)
 		echo ""
 		echo "ERROR: Unrecognized Option: ${argument}"
@@ -124,9 +128,11 @@ PRINTCOM=""
 
 ######################################### DO WORK ##########################################
 
+
 # The PhaseEncodinglist contains phase encoding direction indicators for each corresponding
 # task in the Tasklist.  Therefore, the Tasklist and the PhaseEncodinglist should have the
 # same number of (space-delimited) elements.
+
 Tasklist=""
 PhaseEncodinglist=""
 
@@ -184,6 +190,7 @@ PhaseEncodinglist="${PhaseEncodinglist} x"
 Tasklist="${Tasklist} tfMRI_WM_LR"
 PhaseEncodinglist="${PhaseEncodinglist} x-"
 
+
 # Verify that Tasklist and PhaseEncodinglist have the same number of elements
 TaskArray=($Tasklist)
 PhaseEncodingArray=($PhaseEncodinglist)
@@ -203,6 +210,9 @@ for Subject in $Subjlist ; do
   echo $Subject
 
   i=1
+  if [[ ! -z "$command_line_specified_task" ]]; then
+    Tasklist="$command_line_specified_task"
+  fi
   for fMRIName in $Tasklist ; do
     echo "  ${fMRIName}"
     UnwarpDir=`echo $PhaseEncodinglist | cut -d " " -f $i`

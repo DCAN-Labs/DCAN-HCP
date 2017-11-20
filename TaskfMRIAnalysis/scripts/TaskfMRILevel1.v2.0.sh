@@ -154,9 +154,9 @@ log_Msg "Create design files, model confounds if desired"
 DIR=`pwd`
 cd ${FEATDir}
 if [ $Confound = "NONE" ] ; then
-  feat_model ${FEATDir}/design
+  feat_model ./design
 else 
-  feat_model ${FEATDir}/design ${ResultsFolder}/${LevelOnefMRIName}/${Confound}
+  feat_model ./design ../../${LevelOnefMRIName}/${Confound}
 fi
 cd $DIR
 

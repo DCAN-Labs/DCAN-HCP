@@ -27,6 +27,14 @@ get_batch_options() {
                 command_line_specified_run_local="TRUE"
                 index=$(( index + 1 ))
                 ;;
+            --task=*)
+                command_line_specified_task=${argument#*=}
+                index=$(( index + 1 ))
+                ;;
+            --Subject=*)
+                command_line_specified_subj=${argument#*=}
+                index=$(( index + 1 ))
+                ;;
 	    *)
 		echo ""
 		echo "ERROR: Unrecognized Option: ${argument}"
@@ -84,6 +92,9 @@ TaskNameList="${TaskNameList} RELATIONAL"
 TaskNameList="${TaskNameList} SOCIAL"
 TaskNameList="${TaskNameList} WM"
 
+if [ -n "${command_line_specified_task}" ]; then
+    TaskNameList="${command_line_specified_task}"
+fi
 for TaskName in ${TaskNameList}
 do
 	LevelOneTasksList="tfMRI_${TaskName}_RL@tfMRI_${TaskName}_LR" #Delimit runs with @ and tasks with space

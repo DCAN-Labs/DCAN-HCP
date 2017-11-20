@@ -36,6 +36,23 @@ echo "${script_name}: Sigma: ${Sigma}"
 #deal with fsl_sub being silly when we want to use numeric equality on decimals
 unset POSIXLY_CORRECT
 
+# Create scratch space directory to run I/O intensive wb_commands
+FastFileInputOutputDIR=/mnt/scratch/fnl_lab
+if [ ! -d ${FastFileInputOutputDIR} ]; then
+    mkdir -p ${FastFileInputOutputDIR}
+    chown :fnl_lab ${FastFileInputOutputDIR}
+    chmod 770 ${FastFileInputOutputDIR}
+fi
+RandomHash=`cat /dev/urandom | tr -cd 'a-f0-9' | head -c 16`
+TempSubjectDIR="${FastFileInputOutputDIR}/${RandomHash}"
+mkdir -p $TempSubjectDIR
+
+function clean_up {
+    echo Exit code caught. Removing temp scratch space directory
+    rm -fR ${TempSubjectDIR}
+}
+
+
 #generate subject-roi space fMRI cifti for subcortical
 if [[ `echo "$BrainOrdinatesResolution == $FinalfMRIResolution" | bc -l | cut -f1 -d.` == "1" ]]
 then
@@ -56,18 +73,27 @@ rm -f ${ResultsFolder}/${NameOffMRI}_temp_subject.dtseries.nii
 echo "${script_name}: Generate atlas subcortical template cifti"
 ${CARET7DIR}/wb_command -cifti-create-label ${ResultsFolder}/${NameOffMRI}_temp_template.dlabel.nii -volume "$ROIFolder"/Atlas_ROIs."$BrainOrdinatesResolution".nii.gz "$ROIFolder"/Atlas_ROIs."$BrainOrdinatesResolution".nii.gz
 
+echo "${script_name}: Running resampling in scratch space to avoid I/O limit"
+cp ${ResultsFolder}/${NameOffMRI}_temp_subject_dilate.dtseries.nii ${TempSubjectDIR}/${NameOffMRI}_temp_subject_dilate.dtseries.nii
+cp ${ResultsFolder}/${NameOffMRI}_temp_template.dlabel.nii ${TempSubjectDIR}/${NameOffMRI}_temp_template.dlabel.nii
+
 if [[ `echo "${Sigma} > 0" | bc -l | cut -f1 -d.` == "1" ]]
 then
     echo "${script_name}: Smoothing and resampling"
     #this is the whole timeseries, so don't overwrite, in order to allow on-disk writing, then delete temporary
-    ${CARET7DIR}/wb_command -cifti-smoothing ${ResultsFolder}/${NameOffMRI}_temp_subject_dilate.dtseries.nii 0 ${Sigma} COLUMN ${ResultsFolder}/${NameOffMRI}_temp_subject_smooth.dtseries.nii -fix-zeros-volume
+    ${CARET7DIR}/wb_command -cifti-smoothing ${ResultsFolder}/${NameOffMRI}_temp_subject_dilate.dtseries.nii 0 ${Sigma} COLUMN ${TempSubjectDIR}/${NameOffMRI}_temp_subject_smooth.dtseries.nii -fix-zeros-volume
     #resample, delete temporary
-    ${CARET7DIR}/wb_command -cifti-resample ${ResultsFolder}/${NameOffMRI}_temp_subject_smooth.dtseries.nii COLUMN ${ResultsFolder}/${NameOffMRI}_temp_template.dlabel.nii COLUMN ADAP_BARY_AREA CUBIC ${ResultsFolder}/${NameOffMRI}_temp_atlas.dtseries.nii -volume-predilate 10
-    rm -f ${ResultsFolder}/${NameOffMRI}_temp_subject_smooth.dtseries.nii
+    ${CARET7DIR}/wb_command -cifti-resample ${TempSubjectDIR}/${NameOffMRI}_temp_subject_smooth.dtseries.nii COLUMN ${TempSubjectDIR}/${NameOffMRI}_temp_template.dlabel.nii COLUMN ADAP_BARY_AREA CUBIC ${TempSubjectDIR}/${NameOffMRI}_temp_atlas.dtseries.nii -volume-predilate 10
+    #rm -f ${ResultsFolder}/${NameOffMRI}_temp_subject_smooth.dtseries.nii
+    cp ${TempSubjectDIR}/${NameOffMRI}_temp_atlas.dtseries.nii ${ResultsFolder}/${NameOffMRI}_temp_atlas.dtseries.nii
 else
     echo "${script_name}: Resampling"
-    ${CARET7DIR}/wb_command -cifti-resample ${ResultsFolder}/${NameOffMRI}_temp_subject_dilate.dtseries.nii COLUMN ${ResultsFolder}/${NameOffMRI}_temp_template.dlabel.nii COLUMN ADAP_BARY_AREA CUBIC ${ResultsFolder}/${NameOffMRI}_temp_atlas.dtseries.nii -volume-predilate 10
+    ${CARET7DIR}/wb_command -cifti-resample ${TempSubjectDIR}/${NameOffMRI}_temp_subject_dilate.dtseries.nii COLUMN ${TempSubjectDIR}/${NameOffMRI}_temp_template.dlabel.nii COLUMN ADAP_BARY_AREA CUBIC ${TempSubjectDIR}/${NameOffMRI}_temp_atlas.dtseries.nii -volume-predilate 10
+    cp ${TempSubjectDIR}/${NameOffMRI}_temp_atlas.dtseries.nii ${ResultsFolder}/${NameOffMRI}_temp_atlas.dtseries.nii
 fi
+#delete the temp space directory
+trap clean_up EXIT SIGTERM SIGHUP SIGINT SIGQUIT
+rm -rf ${TempSubjectDIR}
 
 #delete common temporaries
 rm -f ${ResultsFolder}/${NameOffMRI}_temp_subject_dilate.dtseries.nii

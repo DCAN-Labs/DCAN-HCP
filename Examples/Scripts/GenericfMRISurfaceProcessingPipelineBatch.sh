@@ -27,6 +27,10 @@ get_batch_options() {
                 command_line_specified_run_local="TRUE"
                 index=$(( index + 1 ))
                 ;;
+            --task=*)
+                command_line_specified_task=${argument#*=}
+                index=$(( index + 1 ))
+                ;;
 	    *)
 		echo ""
 		echo "ERROR: Unrecognized Option: ${argument}"
@@ -97,7 +101,9 @@ Tasklist="${Tasklist} tfMRI_WM_LR"
 
 for Subject in $Subjlist ; do
   echo $Subject
-
+  if [[ ! -z "$command_line_specified_task" ]]; then
+    Tasklist="$command_line_specified_task"
+  fi
   for fMRIName in $Tasklist ; do
     echo "  ${fMRIName}"
     LowResMesh="32" #Needs to match what is in PostFreeSurfer, 32 is on average 2mm spacing between the vertices on the midthickness
