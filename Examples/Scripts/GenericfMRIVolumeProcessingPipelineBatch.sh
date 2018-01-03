@@ -55,6 +55,38 @@ if [ -n "${command_line_specified_subj}" ]; then
     Subjlist="${command_line_specified_subj}"
 fi
 
+# Create scratch space directory to run I/O intensive wb_commands
+FastFileInputOutputDIR=/mnt/scratch/fnl_lab
+if [ ! -d ${FastFileInputOutputDIR} ]; then
+    mkdir -p ${FastFileInputOutputDIR}
+    chown :fnl_lab ${FastFileInputOutputDIR}
+    chmod 770 ${FastFileInputOutputDIR}
+fi
+RandomHash=`cat /dev/urandom | tr -cd 'a-f0-9' | head -c 16`
+TempSubjectDIR="${FastFileInputOutputDIR}/${RandomHash}"
+mkdir -p $TempSubjectDIR
+
+function clean_up {
+    echo Exit code caught. Rsyncing data back to subject dir and removing temp scratch space directory
+    slither -l -m ".+/(sub-.{15})/(.+)" -p ".+/T1w/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${ScratchDir}//sub-*/MNINonLinear ${ScratchDir}/sub-*/T1w ${ScratchDir}/sub-*/Scripts ${ScratchDir}/sub-*/unprocessed "if [ -L \g<0> ]; then unlink \g<0>; fi"
+    slither -l --min 1 --max 1 -m ".+/(sub-.{15}/T1w)/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${ScratchDir}/sub-*/T1w "if [ -L \g<0> ]; then unlink \g<0>; fi"
+    rsync -vrt ${ScratchDir}/${Subjlist} ${StudyFolder_orig}/
+    rm -fR ${TempSubjectDIR}
+}
+
+# Make the parent directory structure
+StudyFolder_orig=${StudyFolder}
+SubjectDir=${StudyFolder}/${Subjlist}
+ScratchDir=${TempSubjectDIR}
+slither -d -m ".+/HCP_release_20170910_v1.1/(sub-.{15})/(.+)" -p ".+/T1w/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${SubjectDir}/MNINonLinear ${SubjectDir}/T1w ${SubjectDir}/Scripts ${SubjectDir}/unprocessed "mkdir -p ${ScratchDir}/\g<1>/\g<2>"
+
+# Symlink all the pre-existing files to the subject's scratch dir
+slither -f -m ".+/HCP_release_20170910_v1.1/(sub-.{15})/(.+)" -p ".+/T1w/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${SubjectDir}/MNINonLinear ${SubjectDir}/T1w ${SubjectDir}/Scripts ${SubjectDir}/unprocessed "ln -s \g<0> ${ScratchDir}/\g<1>/\g<2>"
+slither -l --min 1 --max 1 -m ".+/HCP_release_20170910_v1.1/(sub-.{15}/T1w)/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${SubjectDir}/T1w "ln -s \g<0> ${ScratchDir}/\g<1>/\g<2>"
+
+# Overwrite the lustre StudyFolder with the scratch StudyFolder
+StudyFolder=${ScratchDir}
+
 # Requirements for this script
 #  installed versions of: FSL (version 5.0.6), FreeSurfer (version 5.3.0-HCP) , gradunwarp (HCP version 1.0.1)
 #  environment: FSLDIR , FREESURFER_HOME , HCPPIPEDIR , CARET7DIR , PATH (for gradient_unwarp.py)
@@ -305,4 +337,6 @@ for Subject in $Subjlist ; do
   done
 done
 
+# Unlink everythin in the scratch StudyFolder and rsync all the real files back to the lustre StudyFolder
+trap clean_up EXIT USR1 SIGTERM
 
