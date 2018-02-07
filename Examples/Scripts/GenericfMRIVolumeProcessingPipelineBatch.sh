@@ -68,21 +68,22 @@ mkdir -p $TempSubjectDIR
 
 function clean_up {
     echo Exit code caught. Rsyncing data back to subject dir and removing temp scratch space directory
-    slither -l -m ".+/(sub-.{15})/(.+)" -p ".+/T1w/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${ScratchDir}//sub-*/MNINonLinear ${ScratchDir}/sub-*/T1w ${ScratchDir}/sub-*/Scripts ${ScratchDir}/sub-*/unprocessed "if [ -L \g<0> ]; then unlink \g<0>; fi"
-    slither -l --min 1 --max 1 -m ".+/(sub-.{15}/T1w)/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${ScratchDir}/sub-*/T1w "if [ -L \g<0> ]; then unlink \g<0>; fi"
+    slither -l -m ".+/${Subjlist}/(.+)" -p ".+/T1w/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${ScratchDir}/${Subjlist}/MNINonLinear ${ScratchDir}/${Subjlist}/T1w ${ScratchDir}/${Subjlist}/Scripts ${ScratchDir}/${Subjlist}/unprocessed "if [ -L \g<0> ]; then unlink \g<0>; fi"
+    slither -l --min 1 --max 1 -m ".+/(${Subjlist}/T1w)/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${ScratchDir}/${Subjlist}/T1w "if [ -L \g<0> ]; then unlink \g<0>; fi"
     rsync -vrt ${ScratchDir}/${Subjlist} ${StudyFolder_orig}/
     rm -fR ${TempSubjectDIR}
 }
 
 # Make the parent directory structure
 StudyFolder_orig=${StudyFolder}
+Pipeline=`basename ${StudyFolder}`
 SubjectDir=${StudyFolder}/${Subjlist}
 ScratchDir=${TempSubjectDIR}
-slither -d -m ".+/HCP_release_20170910_v1.1/(sub-.{15})/(.+)" -p ".+/T1w/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${SubjectDir}/MNINonLinear ${SubjectDir}/T1w ${SubjectDir}/Scripts ${SubjectDir}/unprocessed "mkdir -p ${ScratchDir}/\g<1>/\g<2>"
+slither -d -m ".+/${Pipeline}/(${Subjlist})/(.+)" -p ".+/T1w/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${SubjectDir}/MNINonLinear ${SubjectDir}/T1w ${SubjectDir}/Scripts ${SubjectDir}/unprocessed "mkdir -p ${ScratchDir}/\g<1>/\g<2>"
 
 # Symlink all the pre-existing files to the subject's scratch dir
-slither -f -m ".+/HCP_release_20170910_v1.1/(sub-.{15})/(.+)" -p ".+/T1w/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${SubjectDir}/MNINonLinear ${SubjectDir}/T1w ${SubjectDir}/Scripts ${SubjectDir}/unprocessed "ln -s \g<0> ${ScratchDir}/\g<1>/\g<2>"
-slither -l --min 1 --max 1 -m ".+/HCP_release_20170910_v1.1/(sub-.{15}/T1w)/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${SubjectDir}/T1w "ln -s \g<0> ${ScratchDir}/\g<1>/\g<2>"
+slither -f -m ".+/${Pipeline}/(${Subjlist})/(.+)" -p ".+/T1w/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${SubjectDir}/MNINonLinear ${SubjectDir}/T1w ${SubjectDir}/Scripts ${SubjectDir}/unprocessed "ln -s \g<0> ${ScratchDir}/\g<1>/\g<2>"
+slither -l --min 1 --max 1 -m ".+/${Pipeline}/(${Subjlist}/T1w)/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${SubjectDir}/T1w "ln -s \g<0> ${ScratchDir}/\g<1>/\g<2>"
 
 # Overwrite the lustre StudyFolder with the scratch StudyFolder
 StudyFolder=${ScratchDir}

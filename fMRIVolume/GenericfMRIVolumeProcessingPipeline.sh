@@ -436,5 +436,8 @@ ${RUN} cp -r ${fMRIFolder}/Movement_RelativeRMS_mean.txt ${ResultsFolder}/Moveme
 ${RUN} cp -r ${fMRIFolder}/Movement_AbsoluteRMS_mean.txt ${ResultsFolder}/Movement_AbsoluteRMS_mean.txt
 ###Add stuff for RMS###
 
+### Remove MotionMatrices dir before ending because it is large and not used later in the pipeline. Added by Anders Perrone 20180103 
+${RUN} rm -rf ${fMRIFolder}/${MotionMatrixFolder}
+
 log_Msg "Completed"
 

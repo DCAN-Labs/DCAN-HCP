@@ -86,7 +86,8 @@ DesignfContrasts=${FEATDir}/design.fts
 ###Grayordinates Processing###
 #Add any additional smoothing
 log_Msg "Grayordinates Processing - Add any additional smoothing"
-if [ ! $FinalSmoothingFWHM -eq $OriginalSmoothingFWHM ] ; then
+#if [ ! $FinalSmoothingFWHM -eq $OriginalSmoothingFWHM ] ; then ## Does not handle floating point comparison - Perrone 20181601
+if ! (( $(echo $FinalSmoothingFWHM '==' $OriginalSmoothingFWHM | bc -l) )); then
   ${CARET7DIR}/wb_command -cifti-smoothing ${ResultsFolder}/${LevelOnefMRIName}/${LevelOnefMRIName}_Atlas.dtseries.nii ${AdditionalSigma} ${AdditionalSigma} COLUMN ${ResultsFolder}/${LevelOnefMRIName}/${LevelOnefMRIName}_Atlas"$SmoothingString".dtseries.nii -left-surface "$DownSampleFolder"/"$Subject".L.midthickness."$LowResMesh"k_fs_LR.surf.gii -right-surface "$DownSampleFolder"/"$Subject".R.midthickness."$LowResMesh"k_fs_LR.surf.gii
 else
   cp ${ResultsFolder}/${LevelOnefMRIName}/${LevelOnefMRIName}_Atlas.dtseries.nii ${ResultsFolder}/${LevelOnefMRIName}/${LevelOnefMRIName}_Atlas"$SmoothingString".dtseries.nii
