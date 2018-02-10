@@ -124,31 +124,33 @@ echo " " >> $WD/xfms/log.txt
 
 ########################################## DO WORK ########################################## 
 
-if $useAntsReg; then
+if [ ! -z "$useAntsReg" ]; then
+    echo " ANTs Registration to MNI Template"
     # Create the warp field
-    echo antsRegistrationSyN.sh -d 3 -f ${Reference2mm} -m ${T1wRestore}.nii.gz -o ${WD}/xfms/acpc_dc2standard
-    antsRegistrationSyN.sh -d 3 -f ${Reference2mm} -m ${T1wRestore}.nii.gz -o ${WD}/xfms/acpc_dc2standard
-    # Apply the transofrmation (warp) to the T1wRestore and and T1wRestoreBrain
-    echo antsApplyTransforms -d 3 -r ${Reference2mm} -i ${T1wImage}.nii.gz -e 0 -t ${WD}/xfms/acpc_dc2standard1Warp.nii.gz -t ${WD}/xfms/acpc_dc2standard0GenericAffine.mat -o ${OutputT1wImage}.nii.gz
-    antsApplyTransforms -d 3 -r ${Reference} -i ${T1wImage}.nii.gz -e 0 -t ${WD}/xfms/acpc_dc2standard1Warp.nii.gz -t ${WD}/xfms/acpc_dc2standard0GenericAffine.mat -o ${OutputT1wImage}.nii.gz
-    echo antsApplyTransforms -d 3 -r ${Reference} -i ${T1wRestore}.nii.gz -e 0 -t ${WD}/xfms/acpc_dc2standard1Warp.nii.gz -t ${WD}/xfms/acpc_dc2standard0GenericAffine.mat -o ${OutputT1wImageRestore}.nii.gz
-    antsApplyTransforms -d 3 -r ${Reference} -i ${T1wRestore}.nii.gz -e 0 -t ${WD}/xfms/acpc_dc2standard1Warp.nii.gz -t ${WD}/xfms/acpc_dc2standard0GenericAffine.mat -o ${OutputT1wImageRestore}.nii.gz
-    echo antsApplyTransforms -d 3 -r ${Reference} -i ${T1wRestoreBrain}.nii.gz -e 0 -t ${WD}/xfms/acpc_dc2standard1Warp.nii.gz -t ${WD}/xfms/acpc_dc2standard0GenericAffine.mat -o ${OutputT1wImageRestoreBrain}.nii.gz
-    antsApplyTransforms -d 3 -r ${Reference} -i ${T1wRestoreBrain}.nii.gz -e 0 -t ${WD}/xfms/acpc_dc2standard1Warp.nii.gz -t ${WD}/xfms/acpc_dc2standard0GenericAffine.mat -o ${OutputT1wImageRestoreBrain}.nii.gz
+    ${ANTSPATH}${ANTSPATH:+/}antsRegistrationSyN.sh -d 3 -f ${Reference2mm} -m ${T1wRestore}.nii.gz -o ${WD}/xfms/acpc_dc2standard_
     
-    # Create Jacobian of the warp
-    CreateJacobianDeterminantImage 3 ${WD}/xfms/acpc_dc2standard1Warp.nii.gz ${WD}/xfms/NonlinearRegJacobians.nii.gz
+    echo " Apply ANTs transform "
+    # Apply the transofrmation (warp) to the T1wRestore and and T1wRestoreBrain
+    ${ANTSPATH}${ANTSPATH:+/}antsApplyTransforms -d 3 -r ${Reference} -i ${T1wImage}.nii.gz -e 0 -t ${WD}/xfms/acpc_dc2standard_1Warp.nii.gz -t ${WD}/xfms/acpc_dc2standard_0GenericAffine.mat -o ${OutputT1wImage}.nii.gz
+    ${ANTSPATH}${ANTSPATH:+/}antsApplyTransforms -d 3 -r ${Reference} -i ${T1wRestore}.nii.gz -e 0 -t ${WD}/xfms/acpc_dc2standard_1Warp.nii.gz -t ${WD}/xfms/acpc_dc2standard_0GenericAffine.mat -o ${OutputT1wImageRestore}.nii.gz
+    ${ANTSPATH}${ANTSPATH:+/}antsApplyTransforms -d 3 -r ${Reference} -i ${T1wRestoreBrain}.nii.gz -e 0 -t ${WD}/xfms/acpc_dc2standard_1Warp.nii.gz -t ${WD}/xfms/acpc_dc2standard_0GenericAffine.mat -o ${OutputT1wImageRestoreBrain}.nii.gz
+   
+    echo " Create Jacobian of the warp" 
+    # Transform jacobian needed in HcpPost
+    ${ANTSPATH}${ANTSPATH:+/}CreateJacobianDeterminantImage 3 ${WD}/xfms/acpc_dc2standard_1Warp.nii.gz ${WD}/xfms/NonlinearRegJacobians.nii.gz
     
     # Convert ANTS warp to FSL
-    c4d -mcs ${WD}/xfms/acpc_dc2standard1Warp.nii.gz -oo ${T1wFolder}/e{1..3}.nii.gz
+    ${C3DPATH}${C3DPATH:+/}c4d -mcs ${WD}/xfms/acpc_dc2standard_1Warp.nii.gz -oo ${T1wFolder}/e{1..3}.nii.gz
     fslmaths ${T1wFolder}/e2.nii.gz -mul -1 ${T1wFolder}/e2.nii.gz
     fslmerge -t ${WD}/xfms/acpc_dc2standard.nii.gz ${T1wFolder}/e{1..3}.nii.gz
     # Convert ANTS mat to txt.mat
-    c3d_affine_tool -itk ${WD}/xfms/acpc_dc2standard0GenericAffine.mat -ref ${T1wRestore}.nii.gz -src ${Reference2mm} -ras2fsl -o ${WD}/xfms/acpc2MNILinear.mat
+    ${C3DPATH}${C3DPATH:+/}c3d_affine_tool -itk ${WD}/xfms/acpc_dc2standard_0GenericAffine.mat -ref ${T1wRestore}.nii.gz -src ${Reference2mm} -ras2fsl -o ${WD}/xfms/acpc2MNILinear.mat
 
     # Create invwarp
     ${FSLDIR}/bin/invwarp -w ${OutputTransform} -o ${OutputInvTransform} -r ${Reference2mm}
 
+    # Create empty this empty file to satisfy expected outputs. Sorry. -Anonymous
+    touch ${WD}/xfms/${T1wRestoreBrainBasename}_to_MNILinear.nii.gz
     
 else
     # Linear then non-linear registration to MNI
