@@ -286,6 +286,7 @@ T2wInputImages=`opts_GetOpt1 "--t2" $@`
 T1wTemplate=`opts_GetOpt1 "--t1template" $@`
 T1wTemplateBrain=`opts_GetOpt1 "--t1templatebrain" $@`
 T1wTemplate2mm=`opts_GetOpt1 "--t1template2mm" $@`
+T1wTemplate2mmBrain=`opts_GetOpt1 "--t1template2mmbrain" $@`
 T2wTemplate=`opts_GetOpt1 "--t2template" $@`
 T2wTemplateBrain=`opts_GetOpt1 "--t2templatebrain" $@`
 T2wTemplate2mm=`opts_GetOpt1 "--t2template2mm" $@`
@@ -329,6 +330,9 @@ useT2=`opts_GetOpt1 "--useT2" $@`
 # Any line that requires the T2 should be encapsulated in an if-then statement and skipped if usemask=false
 usemask=`opts_GetOpt1 "--usemask" $@`
 
+# useAntsReg flag added for using ANTS registration instead of FSL AP 20180602
+useAntsReg=`opts_GetOpt1 "--useAntsReg" $@`
+
 
 # ------------------------------------------------------------------------------
 #  Show Command Line Options
@@ -342,6 +346,7 @@ log_Msg "T2wInputImages: ${T2wInputImages}"
 log_Msg "T1wTemplate: ${T1wTemplate}"
 log_Msg "T1wTemplateBrain: ${T1wTemplateBrain}"
 log_Msg "T1wTemplate2mm: ${T1wTemplate2mm}"
+log_Msg "T1wTemplate2mmBrain: ${T1wTemplate2mmBrain}"
 log_Msg "T2wTemplate: ${T2wTemplate}"
 log_Msg "T2wTemplateBrain: ${T2wTemplateBrain}"
 log_Msg "T2wTemplate2mm: ${T2wTemplate2mm}"
@@ -367,6 +372,7 @@ log_Msg "BiasFieldSmoothingSigma: ${BiasFieldSmoothingSigma}"
 log_Msg "UseJacobian: ${UseJacobian}"
 log_Msg "useT2: ${useT2}"
 log_Msg "usemask: ${usemask}"
+log_Msg "useAntsReg: ${useAntsReg}"
 
 # ------------------------------------------------------------------------------
 #  Show Environment Variables
@@ -656,7 +662,10 @@ else
     fast -b -B -o ${T1wFolder}/T1w_fast -t 1 ${T1wFolder}/T1w_acpc_dc_brain.nii.gz
     imcp ${T1wFolder}/T1w_fast_bias ${T1wFolder}/BiasField_acpc_dc
     imcp ${T1wFolder}/T1w_fast_restore ${T1wFolder}/${T1wImage}_acpc_dc_restore_brain
-    imcp ${T1wFolder}/T1w_fast_restore ${T1wFolder}/${T1wImage}_acpc_dc_restore #FAST does not output a non-brain extracted image, so use the brain extracted as the full image AP 20162111
+    #FAST does not output a non-brain extracted image so create an inverse mask, apply it to T1w_acpc_dc.nii.gz, insert the T1w_fast_restore to the skull of the T1w_acpc_dc.nii.gz and use that for the T1w_acpc_dc_restore head
+    fslmaths ${T1wFolder}/T1w_acpc_brain_mask.nii.gz -mul -1 -add 1 ${T1wFolder}/T1w_acpc_inverse_brain_mask.nii.gz
+    fslmaths ${T1wFolder}/T1w_acpc_dc.nii.gz -mul ${T1wFolder}/T1w_acpc_inverse_brain_mask.nii.gz ${T1wFolder}/T1w_acpc_dc_skull.nii.gz
+    fslmaths ${T1wFolder}/T1w_fast_restore.nii.gz -add ${T1wFolder}/T1w_acpc_dc_skull.nii.gz ${T1wFolder}/${T1wImage}_acpc_dc_restore
 fi
 # ------------------------------------------------------------------------------
 #  Atlas Registration to MNI152: FLIRT + FNIRT  
@@ -678,6 +687,7 @@ ${RUN} ${HCPPIPEDIR_PreFS}/AtlasRegistrationToMNI152_FLIRTandFNIRT.sh \
     --refbrain=${T1wTemplateBrain} \
     --refmask=${TemplateMask} \
     --ref2mm=${T1wTemplate2mm} \
+    --ref2mmbrain=${T1wTemplate2mmBrain} \
     --ref2mmmask=${Template2mmMask} \
     --owarp=${AtlasSpaceFolder}/xfms/acpc_dc2standard.nii.gz \
     --oinvwarp=${AtlasSpaceFolder}/xfms/standard2acpc_dc.nii.gz \
@@ -690,7 +700,8 @@ ${RUN} ${HCPPIPEDIR_PreFS}/AtlasRegistrationToMNI152_FLIRTandFNIRT.sh \
     --fnirtconfig=${FNIRTConfig} \
     --useT2=${useT2} \
     --T1wFolder=${T1wFolder} \
-    --usemask=${usemask}
+    --usemask=${usemask} \
+    --useAntsReg=${useAntsReg}
 
 log_Msg "Completed"
 
