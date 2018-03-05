@@ -162,6 +162,7 @@ recon-all -i "$T1wImageFile"_1mm.nii.gz -subjid $SubjectID -sd $TempSubjectDIR -
 
 # FAIR LAB POST RECON-ALL STEPS # Added by Eric Earl 12/20/2016
 mv "$TempSubjectDIR"/"$SubjectID" $SubjectDIR/
+chown :fnl_lab -R $SubjectDIR/
 rm -rf $TempSubjectDIR
 
 # Generate brain mask

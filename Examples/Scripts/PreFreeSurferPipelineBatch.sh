@@ -214,6 +214,7 @@ main()
 	# Cycle through specified subjects
     useT2=${useT2:-true} # sets the useT2 flag default to "true" - AP 20162111
     usemask=${usemask:-false} # sets the usemask falg default to "false" - EF 20170330
+    useAntsReg=${useAntsReg:-false}
 	for Subject in $Subjlist ; do
 		echo $Subject
 
@@ -488,6 +489,7 @@ main()
 			--topupconfig="$TopupConfig" \
             --useT2="$useT2" \
             --usemask="$usemask" \
+            --useAntsReg="$useAntsReg" \
 			--printcom=$PRINTCOM
 		
 	done

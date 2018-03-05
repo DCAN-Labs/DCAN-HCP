@@ -72,6 +72,7 @@ function clean_up {
     slither -l --min 1 --max 1 -m ".+/(${Subjlist}/T1w)/(fsaverage|lh\.EC_average|rh\.EC_average)$" ${ScratchDir}/${Subjlist}/T1w "if [ -L \g<0> ]; then unlink \g<0>; fi"
     rsync -vrt ${ScratchDir}/${Subjlist} ${StudyFolder_orig}/
     rm -fR ${TempSubjectDIR}
+    chown :fnl_lab -R ${StudyFolder_orig}/
 }
 
 # Make the parent directory structure
