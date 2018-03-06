@@ -215,6 +215,8 @@ main()
     useT2=${useT2:-true} # sets the useT2 flag default to "true" - AP 20162111
     usemask=${usemask:-false} # sets the usemask falg default to "false" - EF 20170330
     useAntsReg=${useAntsReg:-false}
+    useStudyTemplate=${useStudyTemplate:-false} # sets the useStudyTemplate flag default to "false" - ABR 20182802
+
 	for Subject in $Subjlist ; do
 		echo $Subject
 
@@ -490,6 +492,9 @@ main()
             --useT2="$useT2" \
             --usemask="$usemask" \
             --useAntsReg="$useAntsReg" \
+			--useStudyTemplate="$useStudyTemplate" \
+			--StudyTemplate=${StudyTemplate} \
+			--StudyTemplateBrain=${StudyTemplateBrain} \
 			--printcom=$PRINTCOM
 		
 	done
