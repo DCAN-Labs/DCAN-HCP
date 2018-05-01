@@ -728,7 +728,7 @@ if [ "${useAntsReg}" ] && [ "${useStudyTemplate}" ]; then
 
 	log_Msg "Performing Atlas Registration to MNI152 (ANTs based)"
 
-	${RUN} ${HCPPIPEDIR_PreFS}/AtlasRegistrationToMNI152_ANTsbased.sh \
+	${RUN} ${HCPPIPEDIR_PreFS}/AtlasRegistrationToMNI152_ANTsIntermediateTemplate.sh \
 	    --workingdir=${AtlasSpaceFolder} \
 	    --t1=${T1wFolder}/${T1wImage}_acpc_dc.nii.gz \
 	    --t1rest=${T1wFolder}/${T1wImage}_acpc_dc_restore.nii.gz \
@@ -741,7 +741,7 @@ if [ "${useAntsReg}" ] && [ "${useStudyTemplate}" ]; then
 	    --ref=${T1wTemplate} \
 	    --refbrain=${T1wTemplateBrain} \
 	    --refmask=${TemplateMask} \
-	    --ref2mm=${T1wTemplate2mm} \
+	    --ref2mm=${T1wTemplate2mm} \a
 	    --ref2mmbrain=${T1wTemplate2mmBrain} \
 	    --ref2mmmask=${Template2mmMask} \
 	    --owarp=${AtlasSpaceFolder}/xfms/acpc_dc2standard.nii.gz \
@@ -767,7 +767,7 @@ else
 
 	log_Msg "Performing Atlas Registration to MNI152 (FLIRT and FNIRT)"
 
-	${RUN} ${HCPPIPEDIR_PreFS}/AtlasRegistrationToMNI152_FLIRTandFNIRT.sh \
+	${RUN} ${HCPPIPEDIR_PreFS}/AtlasRegistrationToMNI152_ANTsbased.sh \
 	    --workingdir=${AtlasSpaceFolder} \
 	    --t1=${T1wFolder}/${T1wImage}_acpc_dc \
 	    --t1rest=${T1wFolder}/${T1wImage}_acpc_dc_restore \
