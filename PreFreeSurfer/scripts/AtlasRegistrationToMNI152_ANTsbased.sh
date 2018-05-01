@@ -17,7 +17,7 @@ Usage() {
   echo "                --t2=<t2w image>"
   echo "	 	--t2rest=<bias corrected t2w image>"
   echo "                --t2restbrain=<bias corrected, brain extracted t2w image>"
-  echo " 		--studytemplate=/home/exacloud/lustre1/fnl_lab/code/internal/pipelines/HCP_release_20161027_parkinson/	parkinsons_atlas/Atlas_head.nii.gz"
+  echo " 		--studytemplate=/home/exacloud/lustre1/fnl_lab/code/internal/pipelines/HCP_release_20161027_parkinson/parkinsons_atlas/Atlas_head.nii.gz"
   echo "  		--studytemplatebrain=/home/exacloud/lustre1/fnl_lab/code/internal/pipelines/HCP_release_20161027_parkinsons/parkinsons_atlas/Atlas_brain.nii.gz"
   echo "                --ref=<reference image>"
   echo "                --refbrain=<reference brain image>"
