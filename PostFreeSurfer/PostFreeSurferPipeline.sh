@@ -143,7 +143,7 @@ InverseAtlasTransform="$AtlasSpaceFolder"/xfms/"$InverseAtlasTransform"
 log_Msg "Conversion of FreeSurfer Volumes and Surfaces to NIFTI and GIFTI and Create Caret Files and Registration"
 log_Msg "RegName: ${RegName}"
 
-if $usemask; then
+if ${usemask:-false}; then
         ############################################# ABIDE FIX  ##########################################################
         # Running fnirt using freesurfer mask to improve nonlinear registration. DS 20170420
         mri_convert -rt nearest -rl "$T1wFolder"/"$T1wRestoreImage".nii.gz "$FreeSurferFolder"/mri/wmparc.mgz "$T1wFolder"/wmparc_1mm.nii.gz
