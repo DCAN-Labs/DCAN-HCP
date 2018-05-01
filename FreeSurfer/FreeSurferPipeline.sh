@@ -147,8 +147,8 @@ log_Msg "Initial Recon-all Steps"
 FastFileInputOutputDIR=/mnt/scratch/fnl_lab
 if [ ! -d ${FastFileInputOutputDIR} ] ; then
     mkdir -p ${FastFileInputOutputDIR}
-    chown :fnl_lab ${FastFileInputOutputDIR}
-    chmod 770 ${FastFileInputOutputDIR}
+    chown :fnl_lab ${FastFileInputOutputDIR} || true
+    chmod 770 ${FastFileInputOutputDIR} || true
 fi
 RandomHash=`cat /dev/urandom | tr -cd 'a-f0-9' | head -c 16`
 TempSubjectDIR="$FastFileInputOutputDIR"/"$RandomHash"
@@ -162,7 +162,7 @@ recon-all -i "$T1wImageFile"_1mm.nii.gz -subjid $SubjectID -sd $TempSubjectDIR -
 
 # FAIR LAB POST RECON-ALL STEPS # Added by Eric Earl 12/20/2016
 mv "$TempSubjectDIR"/"$SubjectID" $SubjectDIR/
-chown :fnl_lab -R $SubjectDIR/
+chown :fnl_lab -R $SubjectDIR/"$SubjectID" || true
 rm -rf $TempSubjectDIR
 
 # Generate brain mask
