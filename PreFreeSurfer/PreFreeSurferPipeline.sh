@@ -335,7 +335,8 @@ useAntsReg=`opts_GetOpt1 "--useAntsReg" $@`
 
 # useStudyTemplate flag added for using Study Specific template ABR 20182802
 useStudyTemplate=`opts_GetOpt1 "--useStudyTemplate" $@`
-
+StudyTemplate=`opts_GetOpt1 "--StudyTemplate" $@`
+StudyTemplateBrain=`opts_GetOpt1 "--StudyTemplateBrain" $@`
 
 # ------------------------------------------------------------------------------
 #  Show Command Line Options
@@ -498,11 +499,15 @@ for TXw in ${Modalities} ; do
         i=1
         for Image in $TXwInputImages ; do
             ${RUN} ${FSLDIR}/bin/fslreorient2std $Image ${TXwFolder}/${TXwImage}${i}_gdc
-            OutputTXwImageSTRING="${OutputTXwImageSTRING}${TXwFolder}/${TXwImage}${i}_gdc "
+            #OutputTXwImageSTRING="${OutputTXwImageSTRING}${TXwFolder}/${TXwImage}${i}_gdc "
+            OutputTXwImageSTRING="${OutputTXwImageSTRING}${TXwFolder}/${TXwImage}${i}_dn "
+            # do image denoise
+            ${RUN} ${ANTSPATH}${ANTSPATH:+/}DenoiseImage -d 3 -n Rician -i ${TXwFolder}/${TXwImage}${i}_gdc.nii.gz -o ${TXwFolder}/${TXwImage}${i}_dn.nii.gz
             i=$(($i+1))
         done
-        
+            
     fi
+
 
     # Average Like (Same Modality) Scans 
 
@@ -515,7 +520,8 @@ for TXw in ${Modalities} ; do
     else
         log_Msg "Not Averaging ${TXw} Images"
         log_Msg "ONLY ONE AVERAGE FOUND: COPYING"
-        ${RUN} ${FSLDIR}/bin/imcp ${TXwFolder}/${TXwImage}1_gdc ${TXwFolder}/${TXwImage}
+        #${RUN} ${FSLDIR}/bin/imcp ${TXwFolder}/${TXwImage}1_gdc ${TXwFolder}/${TXwImage}
+        ${RUN} ${FSLDIR}/bin/imcp ${TXwFolder}/${TXwImage}1_dn ${TXwFolder}/${TXwImage}
     fi
 
     # ACPC align T1w or T2w image to 0.7mm MNI Template to create native volume space
@@ -530,7 +536,7 @@ for TXw in ${Modalities} ; do
         --omat=${TXwFolder}/xfms/acpc.mat \
         --brainsize=${BrainSize}
 
-    if [ ${useAntsReg} && ${useStudyTemplate} ]; then
+    if [ "${useAntsReg}" ] && [ "${useStudyTemplate}" ]; then
 	   # Brain Extraction(ANTs-based Masking)
 	   log_Msg "Performing Brain Extraction using ANTs-based Masking"
 	   log_Msg "mkdir -p ${TXwFolder}/BrainExtraction_ANTsbased"
@@ -689,10 +695,33 @@ else
     fslmaths ${T1wFolder}/T1w_fast_restore.nii.gz -add ${T1wFolder}/T1w_acpc_dc_skull.nii.gz ${T1wFolder}/${T1wImage}_acpc_dc_restore
 fi
 
-if [ ${useAntsReg} && ${useStudyTemplate} ]; then
+# ------------------------------------------------------------------------------
+# Perform Joint label fusion
+# ------------------------------------------------------------------------------
+#log_Msg "Performing Joint Label Fusion"
+
+#mkdir -p ${T1wFolder}/TemplateLabelFusion
+# for now, use basic wrapper for joint label fusion
+#MultiTemplateDir=/home/exacloud/lustre1/fnl_lab/code/internal/pipelines/HCP_release_20170910_v1.2/global/templates/parkinsons_atlas/segmentations
+#MultiTemplateT1wBrain=T1w_acpc_dc.nii.gz
+#MultiTemplateSeg=aseg.nii.gz
+#Council=($(ls "$MultiTemplateDir"))  # we have to make sure only subdirectories are inside...
+#cmd="${HCPPIPEDIR_PreFS}/run_JLF.sh --working-dir=${T1wFolder}/TemplateLabelFusion \
+#                --target=$T1wFolder/${T1wImage}_acpc_dc_restore_brain.nii.gz \
+#                --refdir=${MultiTemplateDir} --output=${T1wFolder}/aseg_acpc.nii.gz --ncores=${OMP_NUM_THREADS:-1}"
+#for ((i=0; i<${#Council[@]}; i++)); do
+#        cmd=${cmd}" -g ${Council[$i]}/$MultiTemplateT1wBrain -l ${Council[$i]}/$MultiTemplateSeg"
+#done
+#echo $cmd
+#$cmd
+# convert aseg_acpc.nii.gz to aseg.mgz and place it subject's T1w/SubjID/mri
+#mkdir -p ${T1wFolder}/${Subject}/mri
+#mri_convert --conform -ns 1 ${T1wFolder}/aseg_acpc.nii.gz ${T1wFolder}/${Subject}/mri/aseg.mgz 
+
+if [ "${useAntsReg}" ] && [ "${useStudyTemplate}" ]; then
 
 	# ------------------------------------------------------------------------------
-	#  Atlas Registration to MNI152: FLIRT + FNIRT  
+	#  Atlas Registration to MNI152: ANTs 
 	#  Also applies registration to T1w and T2w images 
 	#  Modified 20170330 by EF to include the option for a native mask in registration
 	# ------------------------------------------------------------------------------
@@ -701,14 +730,14 @@ if [ ${useAntsReg} && ${useStudyTemplate} ]; then
 
 	${RUN} ${HCPPIPEDIR_PreFS}/AtlasRegistrationToMNI152_ANTsbased.sh \
 	    --workingdir=${AtlasSpaceFolder} \
-	    --t1=${T1wFolder}/${T1wImage}_acpc_dc \
-	    --t1rest=${T1wFolder}/${T1wImage}_acpc_dc_restore \
-	    --t1restbrain=${T1wFolder}/${T1wImage}_acpc_dc_restore_brain \
-	    --t2=${T1wFolder}/${T2wImage}_acpc_dc \
-	    --t2rest=${T1wFolder}/${T2wImage}_acpc_dc_restore \
-	    --t2restbrain=${T1wFolder}/${T2wImage}_acpc_dc_restore_brain \
-	    --studytemplate=${StudyTemplate} \ 
-	    --studytemplatebrain=${StudyTemplateBrain} \ 
+	    --t1=${T1wFolder}/${T1wImage}_acpc_dc.nii.gz \
+	    --t1rest=${T1wFolder}/${T1wImage}_acpc_dc_restore.nii.gz \
+	    --t1restbrain=${T1wFolder}/${T1wImage}_acpc_dc_restore_brain.nii.gz \
+	    --t2=${T1wFolder}/${T2wImage}_acpc_dc.nii.gz \
+	    --t2rest=${T1wFolder}/${T2wImage}_acpc_dc_restore.nii.gz \
+	    --t2restbrain=${T1wFolder}/${T2wImage}_acpc_dc_restore_brain.nii.gz \
+	    --studytemplate=${StudyTemplate} \
+	    --studytemplatebrain=${StudyTemplateBrain} \
 	    --ref=${T1wTemplate} \
 	    --refbrain=${T1wTemplateBrain} \
 	    --refmask=${TemplateMask} \
