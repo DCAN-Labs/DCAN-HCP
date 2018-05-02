@@ -524,6 +524,10 @@ for TXw in ${Modalities} ; do
         ${RUN} ${FSLDIR}/bin/imcp ${TXwFolder}/${TXwImage}1_dn ${TXwFolder}/${TXwImage}
     fi
 
+    # Apply ANTs N4BiasFieldCorrection
+    ${RUN} ${FSLDIR}/bin/immv ${TXwFolder}/${TXwImage} ${TXwFolder}/${TXwImage}_PreN4
+    ${RUN} ${ANTSPATH}${ANTSPATH:+/}N4BiasFieldCorrection -d 3 -i ${TXwFolder}/${TXwImage}_PreN4.nii.gz -o [${TXwFolder}/${TXwImage}.nii.gz,${TXwFolder}/N4BiasField.nii.gz]
+
     # ACPC align T1w or T2w image to 0.7mm MNI Template to create native volume space
     log_Msg "Aligning ${TXw} image to 0.7mm MNI ${TXw}Template to create native volume space"
     log_Msg "mkdir -p ${TXwFolder}/ACPCAlignment"
