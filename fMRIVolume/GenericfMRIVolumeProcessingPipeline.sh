@@ -311,6 +311,12 @@ ${RUN} "$PipelineScripts"/MotionCorrection.sh \
     "$MotionMatrixPrefix" \
     "$MotionCorrectionType"
 
+# ANTs Denoising and BiasFieldCorrection on Scout
+${RUN} ${FSLDIR}/bin/immv "$fMRIFolder"/"$ScoutName"_gdc "$fMRIFolder"/"$ScoutName"_gdc_nocorrect
+${RUN} ${ANTSPATH}${ANTSPATH:+/}DenoiseImage -d 3 -n Rician -i "$fMRIFolder"/"$ScoutName"_gdc_nocorrect.nii.gz -o "$fMRIFolder"/"$ScoutName"_dn.nii.gz
+${RUN} ${ANTSPATH}${ANTSPATH:+/}N4BiasFieldCorrection -d 3 -i "$fMRIFolder"/"$ScoutName"_dn.nii.gz -o ["$fMRIFolder"/"$ScoutName"_dn_bf.nii.gz,"$fMRIFolder"/N4BiasField.nii.gz]
+
+
 # EPI Distortion Correction and EPI to T1w Registration
 log_Msg "EPI Distortion Correction and EPI to T1w Registration"
 
@@ -325,7 +331,7 @@ mkdir -p ${DCFolder}
 
 ${RUN} ${PipelineScripts}/DistortionCorrectionAndEPIToT1wReg_FLIRTBBRAndFreeSurferBBRbased.sh \
     --workingdir=${DCFolder} \
-    --scoutin=${fMRIFolder}/${ScoutName}_gdc \
+    --scoutin=${fMRIFolder}/${ScoutName}_dn_bf \
     --t1=${T1wFolder}/${T1wImage} \
     --t1restore=${T1wFolder}/${T1wRestoreImage} \
     --t1brain=${T1wFolder}/${T1wRestoreImageBrain} \
