@@ -332,11 +332,15 @@ usemask=`opts_GetOpt1 "--usemask" $@`
 
 # useAntsReg flag added for using ANTS registration instead of FSL AP 20180602
 useAntsReg=`opts_GetOpt1 "--useAntsReg" $@`
+useAntsReg=`opts_DefaultOpt $useAntsReg true`
 
 # useStudyTemplate flag added for using Study Specific template ABR 20182802
 useStudyTemplate=`opts_GetOpt1 "--useStudyTemplate" $@`
+useStudyTemplate=`opts_DefaultOpt $useStudyTemplate false`
+
 StudyTemplate=`opts_GetOpt1 "--StudyTemplate" $@`
 StudyTemplateBrain=`opts_GetOpt1 "--StudyTemplateBrain" $@`
+
 
 # ------------------------------------------------------------------------------
 #  Show Command Line Options
@@ -540,7 +544,7 @@ for TXw in ${Modalities} ; do
         --omat=${TXwFolder}/xfms/acpc.mat \
         --brainsize=${BrainSize}
 
-    if [ "${useAntsReg}" ] && [ "${useStudyTemplate}" ]; then
+    if ${useAntsReg} && ${useStudyTemplate}; then
 	   # Brain Extraction(ANTs-based Masking)
 	   log_Msg "Performing Brain Extraction using ANTs-based Masking"
 	   log_Msg "mkdir -p ${TXwFolder}/BrainExtraction_ANTsbased"
@@ -722,7 +726,7 @@ fi
 #mkdir -p ${T1wFolder}/${Subject}/mri
 #mri_convert --conform -ns 1 ${T1wFolder}/aseg_acpc.nii.gz ${T1wFolder}/${Subject}/mri/aseg.mgz 
 
-if [ "${useAntsReg}" ] && [ "${useStudyTemplate}" ]; then
+if ${useAntsReg} && ${useStudyTemplate}; then
 
 	# ------------------------------------------------------------------------------
 	#  Atlas Registration to MNI152: ANTs 
