@@ -780,6 +780,7 @@ else
 	    --t1=${T1wFolder}/${T1wImage}_acpc_dc \
 	    --t1rest=${T1wFolder}/${T1wImage}_acpc_dc_restore \
 	    --t1restbrain=${T1wFolder}/${T1wImage}_acpc_dc_restore_brain \
+        --t1mask=${T1wFolder}/${T1wImage}_acpc_brain_mask \
 	    --t2=${T1wFolder}/${T2wImage}_acpc_dc \
 	    --t2rest=${T1wFolder}/${T2wImage}_acpc_dc_restore \
 	    --t2restbrain=${T1wFolder}/${T2wImage}_acpc_dc_restore_brain \

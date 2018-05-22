@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Copy gold standard Caret7 config file to /tmp/fnl_lab/. Make sure that a symlink to that location exits in ~/.config/ - Anders Perrone 20171127
-if [ ! -d /tmp/fnl_lab/brainvis.wustl.edu ]; then
-    if [ ! -d /tmp/fnl_lab ]; then
-        mkdir -p /tmp/fnl_lab # fnl_lab is not necessary, but we're stuck with it until ABCD processing complete
+if [ ! -d /tmp/${USER}/brainvis.wustl.edu ]; then
+    if [ ! -d /tmp/${USER} ]; then
+        mkdir -p /tmp/${USER} # fnl_lab is not necessary, but we're stuck with it until ABCD processing complete
     fi
 
-    cp -rf /home/exacloud/lustre1/fnl_lab/code/internal/pipelines/HCP_generic_srun/brainvis.wustl.edu /tmp/fnl_lab/
-    chmod g+w -R /tmp/fnl_lab
+    cp -rf /home/exacloud/lustre1/fnl_lab/code/internal/pipelines/HCP_generic_srun/brainvis.wustl.edu /tmp/${USER}/
+    chmod g+w -R /tmp/${USER}
 fi
 
 set -e

@@ -76,6 +76,7 @@ WD=`getopt1 "--workingdir" $@`  # "$1"
 T1wImage=`getopt1 "--t1" $@`  # "$2"
 T1wRestore=`getopt1 "--t1rest" $@`  # "$3"
 T1wRestoreBrain=`getopt1 "--t1restbrain" $@`  # "$4"
+T1wMask=`getopt1 "--t1mask" $@`
 T2wImage=`getopt1 "--t2" $@`  # "$5"
 T2wRestore=`getopt1 "--t2rest" $@`  # "$6"
 T2wRestoreBrain=`getopt1 "--t2restbrain" $@`  # "$7"
@@ -129,9 +130,9 @@ echo " ANTs T1w Registration to MNI"
 echo " "
 
 # Register the T1wImage to the MNI atlas
-echo ${ANTSPATH}${ANTSPATH:+/}antsRegistrationSyN.sh -d 3 -f ${Reference} -m ${T1wRestore}.nii.gz -x ${ReferenceMask} -o ${WD}/xfms/T1w_to_MNI_
+echo ${ANTSPATH}${ANTSPATH:+/}antsRegistrationSyN.sh -d 3 -f ${Reference} -m ${T1wRestore}.nii.gz -x ${ReferenceMask},${T1wMask}.nii.gz -o ${WD}/xfms/T1w_to_MNI_
 
-${ANTSPATH}${ANTSPATH:+/}antsRegistrationSyN.sh -d 3 -f ${Reference} -m ${T1wRestore}.nii.gz -x ${ReferenceMask} -o ${WD}/xfms/T1w_to_MNI_
+${ANTSPATH}${ANTSPATH:+/}antsRegistrationSyN.sh -d 3 -f ${Reference} -m ${T1wRestore}.nii.gz -x ${ReferenceMask},${T1wMask}.nii.gz -o ${WD}/xfms/T1w_to_MNI_
 
 echo " antsApplyTransform"
 echo " "
