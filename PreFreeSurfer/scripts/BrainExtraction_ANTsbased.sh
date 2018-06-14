@@ -78,7 +78,7 @@ echo "date: `date`" >> $WD/log.txt
 echo " " >> $WD/log.txt
 
 
-/home/exacloud/lustre1/fnl_lab/code/internal/utilities/Atlas_Image_Tools/atlas2Subject/antsSkullStrip.sh -i ${Input}.nii.gz -t ${StudyTemplate} -b ${StudyTemplateBrain} -o ${OutputBrainExtractedImage}.nii.gz -f ${WD} --keep-files --refine
+${HCPPIPEDIR_PreFS}/antsSkullStrip.sh -i ${Input}.nii.gz -t ${StudyTemplate} -b ${StudyTemplateBrain} -o ${OutputBrainExtractedImage}.nii.gz -f ${WD} --keep-files --refine
 
 echo " "
 echo ${FSLDIR}/bin/fslmaths $OutputBrainExtractedImage -bin $OutputBrainMask
