@@ -26,7 +26,7 @@ if [ ! -d /tmp/fnl_lab/brainvis.wustl.edu ]; then
     if [ ! -d /tmp/fnl_lab ]; then
         mkdir /tmp/fnl_lab 
     fi
-    cp -r /home/exacloud/lustre1/fnl_lab/code/internal/pipelines/HCP_generic_srun/brainvis.wustl.edu /tmp/fnl_lab/
+    cp -r ${HCPPIPEDIR}/brainvis.wustl.edu /tmp/fnl_lab
 fi
 
 
