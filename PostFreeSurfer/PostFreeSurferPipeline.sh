@@ -74,6 +74,21 @@ useT2=`opts_GetOpt1 "--useT2" $@`
 usemask=`opts_GetOpt1 "--usemask" $@`
 usemask=${usemask:-false}
 
+# Extra arguments for ANTs based Atlas Registration
+useAntsReg=`opts_GetOpt1 "--useAntsReg" $@`
+useStudyTemplate=`opts_GetOpt1 "--useStudyTemplate" $@`
+StudyTemplate=`opts_GetOpt1 "--studytemplate" $@`
+StudyTemplateBrain=`opts_GetOpt1 "--studytemplatebrain" $@`
+T1wTemplate=`opts_GetOpt1 "--t1template" $@`
+T1wTemplateBrain=`opts_GetOpt1 "--t1templatebrain" $@`
+T1wTemplate2mm=`opts_GetOpt1 "--t1template2mm" $@`
+T1wTemplate2mmBrain=`opts_GetOpt1 "--t1template2mmbrain" $@`
+T2wTemplate=`opts_GetOpt1 "--t2template" $@`
+T2wTemplateBrain=`opts_GetOpt1 "--t2templatebrain" $@`
+T2wTemplate2mm=`opts_GetOpt1 "--t2template2mm" $@`
+TemplateMask=`opts_GetOpt1 "--templatemask" $@`
+Template2mmMask=`opts_GetOpt1 "--template2mmmask" $@`
+
 #################### ABIDE FIX ########################
 Reference2mm=`opts_GetOpt1 "--reference2mm" $@`
 Reference2mmMask=`opts_GetOpt1 "--reference2mmmask" $@`
@@ -143,21 +158,91 @@ InverseAtlasTransform="$AtlasSpaceFolder"/xfms/"$InverseAtlasTransform"
 log_Msg "Conversion of FreeSurfer Volumes and Surfaces to NIFTI and GIFTI and Create Caret Files and Registration"
 log_Msg "RegName: ${RegName}"
 
-if ${usemask:-false}; then
-        ############################################# ABIDE FIX  ##########################################################
-        # Running fnirt using freesurfer mask to improve nonlinear registration. DS 20170420
-        mri_convert -rt nearest -rl "$T1wFolder"/"$T1wRestoreImage".nii.gz "$FreeSurferFolder"/mri/wmparc.mgz "$T1wFolder"/wmparc_1mm.nii.gz
-        fslmaths "$T1wFolder"/wmparc_1mm.nii.gz -bin -dilD -dilD -dilD -ero -ero "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz
-        ${CARET7DIR}/wb_command -volume-fill-holes "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz
-        fslmaths "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz -bin "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz
-        applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz -r "$AtlasSpaceFolder"/"$AtlasSpaceT1wImage" --premat=$FSLDIR/etc/flirtsch/ident.mat -o "$T1wFolder"/"$T1wImageBrainMask".nii.gz
-        convertwarp --relout --rel --ref="$T1wFolder"/"$T1wImageBrainMask" --premat="$T1wFolder"/xfms/"$InitialT1wTransform" --warp1="$T1wFolder"/xfms/"$dcT1wTransform" --out="$T1wFolder"/xfms/"$OutputOrigT1wToT1w"
-        applywarp --rel --interp=spline -i "$T1wFolder"/"$OrginalT1wImage" -r "$T1wFolder"/"$T1wImageBrainMask" -w "$T1wFolder"/xfms/"$OutputOrigT1wToT1w" -o "$T1wFolder"/"$OutputT1wImage"
-        fslmaths "$T1wFolder"/"$OutputT1wImage" -abs "$T1wFolder"/"$OutputT1wImage" -odt float
-        fslmaths "$T1wFolder"/"$OutputT1wImage" -div "$T1wFolder"/"$BiasField" "$T1wFolder"/"$OutputT1wImageRestore"
-        ${FSLDIR}/bin/fnirt --in=${T1wFolder}/${T1wRestoreImage}  --inmask=${T1wFolder}/${T1wImageBrainMask} --ref=${Reference2mm} --aff=${AtlasSpaceFolder}/xfms/acpc2MNILinear.mat --refmask=${Reference2mmMask} --fout=${AtlasTransform} --jout=${AtlasSpaceFolder}/xfms/NonlinearRegJacobians.nii.gz --refout=${AtlasSpaceFolder}/xfms/IntensityModulatedT1.nii.gz --iout=${AtlasSpaceFolder}/xfms/2mmReg.nii.gz --logout=${AtlasSpaceFolder}/xfms/NonlinearReg.txt --intout=${AtlasSpaceFolder}/xfms/NonlinearIntensities.nii.gz --cout=${AtlasSpaceFolder}/xfms/NonlinearReg.nii.gz --config=${FNIRTConfig}
-        ${FSLDIR}/bin/invwarp -w ${AtlasTransform} -o ${InverseAtlasTransform} -r ${Reference2mm}
-        ###################################################################################################################
+log_Msg "Atlas Registration was taken out of PreFreeSurfer and reimplemented here in PostFreeSurfer because the new ANTs based method is improved when using the brain mask generated in FreeSurfer as opposed to the one generated in PreFreeSurfer"
+
+# Run ANTS Atlas Registration from PreFreeSurfer using the freesurfer mask (brainmask_fs.nii.gz)
+
+if ${useAntsReg} && ${useStudyTemplate:-false}; then
+
+        # ------------------------------------------------------------------------------
+        #  Atlas Registration to MNI152: ANTs with Intermediate Template
+        #  Also applies registration to T1w and T2w images
+        #  Modified 20170330 by EF to include the option for a native mask in registration
+        # ------------------------------------------------------------------------------
+
+        log_Msg "Performing Atlas Registration to MNI152 (ANTs based with intermediate template)"
+
+        "${PipelineScripts}"/AtlasRegistrationToMNI152_ANTsIntermediateTemplate.sh \
+            --workingdir=${AtlasSpaceFolder} \
+            --t1=${T1wFolder}/${T1wImage} \
+            --t1rest=${T1wFolder}/${T1wImage}_restore \
+            --t1restbrain=${T1wFolder}/${T1wImage}_restore_brain \
+            --t1mask=${T1wFolder}/brainmask_fs \
+            --t2=${T1wFolder}/${T2wImage} \
+            --t2rest=${T1wFolder}/${T2wImage}_restore \
+            --t2restbrain=${T1wFolder}/${T2wImage}_restore_brain \
+            --studytemplate=${StudyTemplate} \
+            --studytemplatebrain=${StudyTemplateBrain} \
+            --ref=${T1wTemplate} \
+            --refbrain=${T1wTemplateBrain} \
+            --refmask=${TemplateMask} \
+            --ref2mm=${T1wTemplate2mm} \
+            --ref2mmbrain=${T1wTemplate2mmBrain} \
+            --ref2mmmask=${Template2mmMask} \
+            --owarp=${AtlasSpaceFolder}/xfms/acpc_dc2standard.nii.gz \
+            --oinvwarp=${AtlasSpaceFolder}/xfms/standard2acpc_dc.nii.gz \
+            --ot1=${AtlasSpaceFolder}/${OutputMNIT1wImage} \
+            --ot1rest=${AtlasSpaceFolder}/${OutputMNIT1wImageRestore} \
+            --ot1restbrain=${AtlasSpaceFolder}/${OutputMNIT1wImageRestoreBrain} \
+            --ot2=${AtlasSpaceFolder}/${OutputMNIT2wImage} \
+            --ot2rest=${AtlasSpaceFolder}/${OutputMNIT2wImageRestore} \
+            --ot2restbrain=${AtlasSpaceFolder}/${OutputMNIT2wImageRestoreBrain} \
+            --useT2=${useT2} \
+            --T1wFolder=${T1wFolder}
+
+        log_Msg "Completed"
+
+else
+
+        # ------------------------------------------------------------------------------
+        #  Atlas Registration to MNI152: FLIRT + FNIRT
+        #  Also applies registration to T1w and T2w images
+        #  Modified 20170330 by EF to include the option for a native mask in registration
+        # ------------------------------------------------------------------------------
+
+        log_Msg "Performing Atlas Registration to MNI152 (ANTs based)"
+
+        "$PipelineScripts"/AtlasRegistrationToMNI152_ANTsbased.sh \
+            --workingdir=${AtlasSpaceFolder} \
+            --t1=${T1wFolder}/${T1wImage} \
+            --t1rest=${T1wFolder}/${T1wImage}_restore \
+            --t1restbrain=${T1wFolder}/${T1wImage}_restore_brain \
+            --t1mask=${T1wFolder}/brainmask_fs \
+            --t2=${T1wFolder}/${T2wImage} \
+            --t2rest=${T1wFolder}/${T2wImage}_restore \
+            --t2restbrain=${T1wFolder}/${T2wImage}_restore_brain \
+            --ref=${T1wTemplate} \
+            --refbrain=${T1wTemplateBrain} \
+            --refmask=${TemplateMask} \
+            --ref2mm=${T1wTemplate2mm} \
+            --ref2mmbrain=${T1wTemplate2mmBrain} \
+            --ref2mmmask=${Template2mmMask} \
+            --owarp=${AtlasSpaceFolder}/xfms/acpc_dc2standard.nii.gz \
+            --oinvwarp=${AtlasSpaceFolder}/xfms/standard2acpc_dc.nii.gz \
+            --ot1=${AtlasSpaceFolder}/${OutputMNIT1wImage} \
+            --ot1rest=${AtlasSpaceFolder}/${OutputMNIT1wImageRestore} \
+            --ot1restbrain=${AtlasSpaceFolder}/${OutputMNIT1wImageRestoreBrain} \
+            --ot2=${AtlasSpaceFolder}/${OutputMNIT2wImage} \
+            --ot2rest=${AtlasSpaceFolder}/${OutputMNIT2wImageRestore} \
+            --ot2restbrain=${AtlasSpaceFolder}/${OutputMNIT2wImageRestoreBrain} \
+            --fnirtconfig=${FNIRTConfig} \
+            --useT2=${useT2} \
+            --T1wFolder=${T1wFolder} \
+            --usemask=${usemask} \
+            --useAntsReg=${useAntsReg}
+
+        log_Msg "Completed"
+
 fi
 
 "$PipelineScripts"/FreeSurfer2CaretConvertAndRegisterNonlinear.sh "$StudyFolder" "$Subject" "$T1wFolder" "$AtlasSpaceFolder" "$NativeFolder" "$FreeSurferFolder" "$FreeSurferInput" "$T1wRestoreImage" "$T2wRestoreImage" "$SurfaceAtlasDIR" "$HighResMesh" "$LowResMeshes" "$AtlasTransform" "$InverseAtlasTransform" "$AtlasSpaceT1wImage" "$AtlasSpaceT2wImage" "$T1wImageBrainMask" "$FreeSurferLabels" "$GrayordinatesSpaceDIR" "$GrayordinatesResolutions" "$SubcorticalGrayLabels" "$RegName" "$InflateExtraScale" "$useT2"

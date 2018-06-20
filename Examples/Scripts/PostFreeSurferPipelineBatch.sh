@@ -93,11 +93,17 @@ for Subject in $Subjlist ; do
   # RegName="MSMSulc" #MSMSulc is recommended, if binary is not available use FS (FreeSurfer)
   RegName="FS" 
   
-  ############################ ABIDE FIX ######################################
-  T1wTemplate2mm="${HCPPIPEDIR_Templates}/MNI152_T1_2mm.nii.gz" # DS 20170420
-  Template2mmMask="${HCPPIPEDIR_Templates}/MNI152_T1_2mm_brain_mask_dil.nii.gz" 
+  ## Variables for ANTs based Atlas Registration
+  T1wTemplate="${HCPPIPEDIR_Templates}/MNI152_T1_1mm.nii.gz"
+  T1wTemplateBrain="${HCPPIPEDIR_Templates}/MNI152_T1_1mm_brain.nii.gz"
+  T1wTemplate2mm="${HCPPIPEDIR_Templates}/MNI152_T1_2mm.nii.gz"
+  T1wTemplate2mmBrain="${HCPPIPEDIR_Templates}/MNI152_T1_2mm_brain.nii.gz"
+  T2wTemplate="${HCPPIPEDIR_Templates}/MNI152_T2_1mm.nii.gz"
+  T2wTemplateBrain="${HCPPIPEDIR_Templates}/MNI152_T2_1mm_brain.nii.gz"
+  T2wTemplate2mm="${HCPPIPEDIR_Templates}/MNI152_T2_2mm.nii.gz"
+  TemplateMask="${HCPPIPEDIR_Templates}/MNI152_T1_1mm_brain_mask.nii.gz"
+  Template2mmMask="${HCPPIPEDIR_Templates}/MNI152_T1_2mm_brain_mask_dil.nii.gz"
   FNIRTConfig="${HCPPIPEDIR_Config}/T1_2_MNI152_2mm.cnf"
-  #############################################################################
 
   if [ -n "${command_line_specified_run_local}" ] ; then
       echo "About to run ${HCPPIPEDIR}/PostFreeSurfer/PostFreeSurferPipeline.sh"
@@ -120,8 +126,19 @@ for Subject in $Subjlist ; do
       --refmyelinmaps="$ReferenceMyelinMaps" \
       --regname="$RegName" \
       --useT2="$useT2" \
-      --reference2mm="$T1wTemplate2mm" \
-      --reference2mmmask="$Template2mmMask" \
+      --useAntsReg="$useAntsReg" \
+      --useStudyTemplate="$useStudyTemplate" \
+      --studytemplate="$StudyTemplate" \
+      --studytemplatebrain="$StudyTemplateBrain" \
+      --t1template="$T1wTemplate" \
+      --t1templatebrain="$T1wTemplateBrain" \
+      --t1template2mm="$T1wTemplate2mm" \
+      --t1template2mmbrain="$T1wTemplate2mmBrain" \
+      --t2template="$T2wTemplate" \
+      --t2templatebrain="$T2wTemplateBrain" \
+      --t2template2mm="$T2wTemplate2mm" \
+      --templatemask="$TemplateMask" \
+      --template2mmmask="$Template2mmMask" \
       --config="$FNIRTConfig" \
       --printcom=$PRINTCOM
 
@@ -138,10 +155,19 @@ for Subject in $Subjlist ; do
       --freesurferlabels="$FreeSurferLabels" \
       --refmyelinmaps="$ReferenceMyelinMaps" \
       --regname="$RegName" \
-      --reference2mm="$T1wTemplate2mm" \
-      --reference2mmmask="$Template2mmMask" \
-      --config="$FNIRTConfig" \
       --useT2="$useT2" \
+      --useAntsReg="$useAntsReg" \
+      --useStudyTemplate="$useStudyTemplate" \
+      --studytemplate="$StudyTemplate" \
+      --studytemplatebrain="$StudyTemplateBrain" \
+      --t1template="$T1wTemplate" \
+      --t1templatebrain="$T1wTemplateBrain" \
+      --t1template2mm="$T1wTemplate2mm" \
+      --t1template2mmbrain="$T1wTemplate2mmBrain" \
+      --t2template="$T2wTemplate" \
+      --t2templatebrain="$T2wTemplateBrain" \
+      --t2template2mm="$T2wTemplate2mm" \
+      --config="$FNIRTConfig" \
       --printcom=$PRINTCOM"
       
    echo ". ${EnvironmentScript}"

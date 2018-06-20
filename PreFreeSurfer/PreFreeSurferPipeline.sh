@@ -726,6 +726,9 @@ fi
 #mkdir -p ${T1wFolder}/${Subject}/mri
 #mri_convert --conform -ns 1 ${T1wFolder}/aseg_acpc.nii.gz ${T1wFolder}/${Subject}/mri/aseg.mgz 
 
+log_Msg "Atlas Registration to MNI152 was removed and implemented in PostFreeSurfer so that it can make use of the better brain mask created in FreeSurfer"
+
+: <<'END'
 if ${useAntsReg} && ${useStudyTemplate}; then
 
 	# ------------------------------------------------------------------------------
@@ -749,7 +752,7 @@ if ${useAntsReg} && ${useStudyTemplate}; then
 	    --ref=${T1wTemplate} \
 	    --refbrain=${T1wTemplateBrain} \
 	    --refmask=${TemplateMask} \
-	    --ref2mm=${T1wTemplate2mm} \a
+	    --ref2mm=${T1wTemplate2mm} \
 	    --ref2mmbrain=${T1wTemplate2mmBrain} \
 	    --ref2mmmask=${Template2mmMask} \
 	    --owarp=${AtlasSpaceFolder}/xfms/acpc_dc2standard.nii.gz \
@@ -807,5 +810,5 @@ else
 	log_Msg "Completed"
 
 fi
-
+END
 
