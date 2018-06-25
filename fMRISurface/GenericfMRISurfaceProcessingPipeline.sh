@@ -6,7 +6,7 @@ if [ ! -d /tmp/${USER}/brainvis.wustl.edu ]; then
         mkdir -p /tmp/${USER} # fnl_lab is not necessary, but we're stuck with it until ABCD processing complete
     fi
 
-    cp -rf /home/exacloud/lustre1/fnl_lab/code/internal/pipelines/HCP_generic_srun/brainvis.wustl.edu /tmp/${USER}/
+    cp -rf ${HCPPIPEDIR}/brainvis.wustl.edu /tmp/${USER}/
     chmod g+w -R /tmp/${USER}
 fi
 

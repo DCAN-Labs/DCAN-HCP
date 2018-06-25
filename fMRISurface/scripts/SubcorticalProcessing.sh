@@ -37,11 +37,11 @@ echo "${script_name}: Sigma: ${Sigma}"
 unset POSIXLY_CORRECT
 
 # Create scratch space directory to run I/O intensive wb_commands
-FastFileInputOutputDIR=/mnt/scratch/fnl_lab
+FastFileInputOutputDIR=${FastFileInputOutputDIR:-/tmp/scratch}
 if [ ! -d ${FastFileInputOutputDIR} ]; then
     mkdir -p ${FastFileInputOutputDIR}
-    chown :fnl_lab ${FastFileInputOutputDIR}
-    chmod 770 ${FastFileInputOutputDIR}
+    chown :fnl_lab ${FastFileInputOutputDIR} || true
+    chmod 770 ${FastFileInputOutputDIR} || true
 fi
 RandomHash=`cat /dev/urandom | tr -cd 'a-f0-9' | head -c 16`
 TempSubjectDIR="${FastFileInputOutputDIR}/${RandomHash}"

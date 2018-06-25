@@ -25,7 +25,7 @@ if [ ! -d /tmp/${USER}/brainvis.wustl.edu ]; then
     if [ ! -d /tmp/${USER} ]; then
         mkdir -p /tmp/${USER} 
     fi
-    cp -fr /home/exacloud/lustre1/fnl_lab/code/internal/pipelines/HCP_generic_srun/brainvis.wustl.edu /tmp/${USER}/
+    cp -fr ${HCPPIPEDIR}/brainvis.wustl.edu /tmp/${USER}/
     chmod g+w -R /tmp/${USER}
 fi
 
