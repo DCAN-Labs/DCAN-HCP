@@ -1,5 +1,6 @@
 #!/bin/bash 
 set -e
+set -x
 
 # Requirements for this script
 #  installed versions of: FSL (version 5.0.6)

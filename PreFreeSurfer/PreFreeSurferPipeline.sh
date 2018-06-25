@@ -737,7 +737,7 @@ if ${useAntsReg} && ${useStudyTemplate}; then
 	#  Modified 20170330 by EF to include the option for a native mask in registration
 	# ------------------------------------------------------------------------------
 
-	log_Msg "Performing Atlas Registration to MNI152 (ANTs based)"
+	log_Msg "Performing Atlas Registration to MNI152 (ANTs based with intermediate template)"
 
 	${RUN} ${HCPPIPEDIR_PreFS}/AtlasRegistrationToMNI152_ANTsIntermediateTemplate.sh \
 	    --workingdir=${AtlasSpaceFolder} \
@@ -776,7 +776,7 @@ else
 	#  Modified 20170330 by EF to include the option for a native mask in registration
 	# ------------------------------------------------------------------------------
 
-	log_Msg "Performing Atlas Registration to MNI152 (FLIRT and FNIRT)"
+	log_Msg "Performing Atlas Registration to MNI152 (ANTs based)"
 
 	${RUN} ${HCPPIPEDIR_PreFS}/AtlasRegistrationToMNI152_ANTsbased.sh \
 	    --workingdir=${AtlasSpaceFolder} \
