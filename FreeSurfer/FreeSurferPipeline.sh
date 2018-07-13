@@ -143,12 +143,13 @@ fslmaths "$T1wImageFile"_1mm.nii.gz -div $Mean -mul 150 -abs "$T1wImageFile"_1mm
 #Initial Recon-all Steps
 log_Msg "Initial Recon-all Steps"
 
-FastFileInputOutputDIR=${FastFileInputOutputDIR:-/tmp}
-if [ ! -d ${FastFileInputOutputDIR} ] ; then
-    mkdir -p ${FastFileInputOutputDIR}
-    chmod 770 ${FastFileInputOutputDIR} || true
+TMPDIR=${TMPDIR:-/tmp/$USER}
+if [ ! -d ${TMPDIR} ] ; then
+    mkdir -p ${TMPDIR}
+    chmod 770 ${TMPDIR} || true
 fi
-TempSubjectDIR="$FastFileInputOutputDIR/$Subject"
+RandomHash=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')
+TempSubjectDIR="${TMPDIR}/${RandomHash}"
 mkdir -p $TempSubjectDIR
 
 # Call recon-all with flags that are part of "-autorecon1", with the exception of -skullstrip.
