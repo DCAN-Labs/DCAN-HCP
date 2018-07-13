@@ -50,7 +50,7 @@ if [ ! -d /tmp/${USER}/brainvis.wustl.edu ]; then
     if [ ! -d /tmp/${USER} ]; then
         mkdir /tmp/${USER} 
     fi
-    cp -r /home/exacloud/lustre1/fnl_lab/code/internal/pipelines/HCP_generic_srun/brainvis.wustl.edu /tmp/${USER}/
+    cp -r ${HCPPIPEDIR}/brainvis.wustl.edu /tmp/${USER}/
 fi
 
 # Establish tool name for logging
