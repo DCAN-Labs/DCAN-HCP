@@ -40,7 +40,6 @@ unset POSIXLY_CORRECT
 FastFileInputOutputDIR=${FastFileInputOutputDIR:-/tmp/scratch}
 if [ ! -d ${FastFileInputOutputDIR} ]; then
     mkdir -p ${FastFileInputOutputDIR}
-    chown :fnl_lab ${FastFileInputOutputDIR} || true
     chmod 770 ${FastFileInputOutputDIR} || true
 fi
 RandomHash=`cat /dev/urandom | tr -cd 'a-f0-9' | head -c 16`

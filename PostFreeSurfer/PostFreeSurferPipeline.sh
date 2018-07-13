@@ -20,16 +20,6 @@ set -e
 source $HCPPIPEDIR/global/scripts/log.shlib  # Logging related functions
 source $HCPPIPEDIR/global/scripts/opts.shlib # Command line option functions
 
-
-# copy gold standard Caret7 config file to /tmp/fnl_lab/. Make sure that a symlink to that location exits in ~/.config/ - Anders Perrone 20171127
-if [ ! -d /tmp/fnl_lab/brainvis.wustl.edu ]; then
-    if [ ! -d /tmp/fnl_lab ]; then
-        mkdir /tmp/fnl_lab 
-    fi
-    cp -r ${HCPPIPEDIR}/brainvis.wustl.edu /tmp/fnl_lab
-fi
-
-
 ########################################## SUPPORT FUNCTIONS ########################################## 
 
 # --------------------------------------------------------------------------------

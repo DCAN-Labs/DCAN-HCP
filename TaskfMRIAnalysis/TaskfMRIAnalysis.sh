@@ -45,14 +45,6 @@ set -e
 source ${HCPPIPEDIR}/global/scripts/log.shlib  # Logging related functions
 source ${HCPPIPEDIR}/global/scripts/opts.shlib # Command line option funtions
 
-# Copy gold standard Caret7 config file to /tmp/fnl_lab/. Make sure that a symlink to that location exits in ~/.config/ - Anders Perrone 20171127
-if [ ! -d /tmp/${USER}/brainvis.wustl.edu ]; then
-    if [ ! -d /tmp/${USER} ]; then
-        mkdir /tmp/${USER} 
-    fi
-    cp -r ${HCPPIPEDIR}/brainvis.wustl.edu /tmp/${USER}/
-fi
-
 # Establish tool name for logging
 log_SetToolName "TaskfMRIAnalysis.sh"
 
