@@ -56,11 +56,10 @@ if [ -n "${command_line_specified_subj}" ]; then
 fi
 
 # Create scratch space directory to run I/O intensive wb_commands
-FastFileInputOutputDIR=${FastFileInputOutputDIR:-/tmp/scratch}
-if [ ! -d ${FastFileInputOutputDIR} ]; then
-    mkdir -p ${FastFileInputOutputDIR}
-    chown :fnl_lab ${FastFileInputOutputDIR} || true
-    chmod 770 ${FastFileInputOutputDIR} || true
+TMPDIR=${TMPDIR:-/tmp/$USER}
+if [ ! -d ${TMPDIR} ]; then
+    mkdir -p ${TMPDIR}
+    chmod 770 ${TMPDIR} || true
 fi
 RandomHash=`cat /dev/urandom | tr -cd 'a-f0-9' | head -c 16`
 TempSubjectDIR="${FastFileInputOutputDIR}/${RandomHash}"

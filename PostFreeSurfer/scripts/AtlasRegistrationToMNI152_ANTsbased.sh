@@ -96,9 +96,7 @@ OutputT2wImageRestore=`getopt1 "--ot2rest" $@`  # "${19}"
 OutputT2wImageRestoreBrain=`getopt1 "--ot2restbrain" $@`  # "${20}"
 FNIRTConfig=`getopt1 "--fnirtconfig" $@`  # "${21}"
 useT2=`getopt1 "--useT2" $@` # "${22}"
-usemask=`getopt1 "--usemask" $@` # "${23}"
 T1wFolder=`getopt1 "--T1wFolder" $@` # "${24}"
-useAntsReg=`getopt1 "--useAntsReg" $@`
 
 # default parameters
 WD=`defaultopt $WD .`
@@ -125,7 +123,6 @@ echo " " >> $WD/xfms/log.txt
 
 ########################################## DO WORK ########################################## 
 
-if "${useAntsReg:-false}"; then
 echo " ANTs T1w Registration to MNI"
 echo " "
 
@@ -183,37 +180,6 @@ ${FSLDIR}${FSLDIR:+/}bin/fslmaths ${OutputT2wImageRestore} -mas ${OutputT2wImage
 fi
 
     
-else
-    # Linear then non-linear registration to MNI
-    ${FSLDIR}/bin/flirt -interp spline -dof 12 -in ${T1wRestoreBrain} -ref ${ReferenceBrain} -omat ${WD}/xfms/acpc2MNILinear.mat -out ${WD}/xfms/${T1wRestoreBrainBasename}_to_MNILinear
-
-    # Check for the usemask flag. If true, generate a mask of the T1w_restore_brain and include it in the FNIRT command. If false, run fnirt without inputting a T1w_restore mask. EF 20170330
-
-    if $usemask; then
-        fslmaths ${T1wRestoreBrain} -bin ${T1wFolder}/T1w_acpc_dc_restore_brain_mask.nii.gz
-        #${FSLDIR}/bin/fnirt --in=${T1wRestore} --inmask=${T1wFolder}/brainmask_fs.nii.gz --ref=${Reference2mm} --aff=${WD}/xfms/acpc2MNILinear.mat --refmask=${Reference2mmMask} --fout=${OutputTransform} --jout=${WD}/xfms/NonlinearRegJacobians.nii.gz --refout=${WD}/xfms/IntensityModulatedT1.nii.gz --iout=${WD}/xfms/2mmReg.nii.gz --logout=${WD}/xfms/NonlinearReg.txt --intout=${WD}/xfms/NonlinearIntensities.nii.gz --cout=${WD}/xfms/NonlinearReg.nii.gz --config=${FNIRTConfig}
-        ${FSLDIR}/bin/fnirt --in=${T1wRestore} --inmask=${T1wFolder}/T1w_acpc_dc_restore_brain_mask.nii.gz --ref=${Reference2mm} --aff=${WD}/xfms/acpc2MNILinear.mat --refmask=${Reference2mmMask} --fout=${OutputTransform} --jout=${WD}/xfms/NonlinearRegJacobians.nii.gz --refout=${WD}/xfms/IntensityModulatedT1.nii.gz --iout=${WD}/xfms/2mmReg.nii.gz --logout=${WD}/xfms/NonlinearReg.txt --intout=${WD}/xfms/NonlinearIntensities.nii.gz --cout=${WD}/xfms/NonlinearReg.nii.gz --config=${FNIRTConfig}
-    else
-        ${FSLDIR}/bin/fnirt --in=${T1wRestore} --ref=${Reference2mm} --aff=${WD}/xfms/acpc2MNILinear.mat --refmask=${Reference2mmMask} --fout=${OutputTransform} --jout=${WD}/xfms/NonlinearRegJacobians.nii.gz --refout=${WD}/xfms/IntensityModulatedT1.nii.gz --iout=${WD}/xfms/2mmReg.nii.gz --logout=${WD}/xfms/NonlinearReg.txt --intout=${WD}/xfms/NonlinearIntensities.nii.gz --cout=${WD}/xfms/NonlinearReg.nii.gz --config=${FNIRTConfig}
-    fi
-
-    # Input and reference spaces are the same, using 2mm reference to save time
-    ${FSLDIR}/bin/invwarp -w ${OutputTransform} -o ${OutputInvTransform} -r ${Reference2mm}
-
-    # T1w set of warped outputs (brain/whole-head + restored/orig)
-    ${FSLDIR}/bin/applywarp --rel --interp=spline -i ${T1wImage} -r ${Reference} -w ${OutputTransform} -o ${OutputT1wImage}
-    ${FSLDIR}/bin/applywarp --rel --interp=spline -i ${T1wRestore} -r ${Reference} -w ${OutputTransform} -o ${OutputT1wImageRestore}
-    ${FSLDIR}/bin/applywarp --rel --interp=nn -i ${T1wRestoreBrain} -r ${Reference} -w ${OutputTransform} -o ${OutputT1wImageRestoreBrain}
-    ${FSLDIR}/bin/fslmaths ${OutputT1wImageRestore} -mas ${OutputT1wImageRestoreBrain} ${OutputT1wImageRestoreBrain}
-
-    if $useT2; then
-        # T2w set of warped outputs (brain/whole-head + restored/orig)
-        ${FSLDIR}/bin/applywarp --rel --interp=spline -i ${T2wImage} -r ${Reference} -w ${OutputTransform} -o ${OutputT2wImage}
-        ${FSLDIR}/bin/applywarp --rel --interp=spline -i ${T2wRestore} -r ${Reference} -w ${OutputTransform} -o ${OutputT2wImageRestore}
-        ${FSLDIR}/bin/applywarp --rel --interp=nn -i ${T2wRestoreBrain} -r ${Reference} -w ${OutputTransform} -o ${OutputT2wImageRestoreBrain}
-        ${FSLDIR}/bin/fslmaths ${OutputT2wImageRestore} -mas ${OutputT2wImageRestoreBrain} ${OutputT2wImageRestoreBrain}
-    fi
-fi
 echo " "
 echo " END: AtlasRegistration to MNI152"
 echo " END: `date`" >> $WD/xfms/log.txt

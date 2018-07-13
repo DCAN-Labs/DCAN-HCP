@@ -326,14 +326,6 @@ UseJacobian=`opts_DefaultOpt $UseJacobian "true"`
 # Any line that requires the T2 should be encapsulated in an if-then statement and skipped if useT2=false
 useT2=`opts_GetOpt1 "--useT2" $@`
 
-# usemask flag added for determining whether to use the masked brain image to improve registration EF 20170330
-# Any line that requires the T2 should be encapsulated in an if-then statement and skipped if usemask=false
-usemask=`opts_GetOpt1 "--usemask" $@`
-
-# useAntsReg flag added for using ANTS registration instead of FSL AP 20180602
-useAntsReg=`opts_GetOpt1 "--useAntsReg" $@`
-useAntsReg=`opts_DefaultOpt $useAntsReg true`
-
 # useStudyTemplate flag added for using Study Specific template ABR 20182802
 useStudyTemplate=`opts_GetOpt1 "--useStudyTemplate" $@`
 useStudyTemplate=`opts_DefaultOpt $useStudyTemplate false`
@@ -703,112 +695,5 @@ else
     fslmaths ${T1wFolder}/T1w_fast_restore.nii.gz -add ${T1wFolder}/T1w_acpc_dc_skull.nii.gz ${T1wFolder}/${T1wImage}_acpc_dc_restore
 fi
 
-# ------------------------------------------------------------------------------
-# Perform Joint label fusion
-# ------------------------------------------------------------------------------
-#log_Msg "Performing Joint Label Fusion"
-
-#mkdir -p ${T1wFolder}/TemplateLabelFusion
-# for now, use basic wrapper for joint label fusion
-#MultiTemplateDir=/home/exacloud/lustre1/fnl_lab/code/internal/pipelines/HCP_release_20170910_v1.2/global/templates/parkinsons_atlas/segmentations
-#MultiTemplateT1wBrain=T1w_acpc_dc.nii.gz
-#MultiTemplateSeg=aseg.nii.gz
-#Council=($(ls "$MultiTemplateDir"))  # we have to make sure only subdirectories are inside...
-#cmd="${HCPPIPEDIR_PreFS}/run_JLF.sh --working-dir=${T1wFolder}/TemplateLabelFusion \
-#                --target=$T1wFolder/${T1wImage}_acpc_dc_restore_brain.nii.gz \
-#                --refdir=${MultiTemplateDir} --output=${T1wFolder}/aseg_acpc.nii.gz --ncores=${OMP_NUM_THREADS:-1}"
-#for ((i=0; i<${#Council[@]}; i++)); do
-#        cmd=${cmd}" -g ${Council[$i]}/$MultiTemplateT1wBrain -l ${Council[$i]}/$MultiTemplateSeg"
-#done
-#echo $cmd
-#$cmd
-# convert aseg_acpc.nii.gz to aseg.mgz and place it subject's T1w/SubjID/mri
-#mkdir -p ${T1wFolder}/${Subject}/mri
-#mri_convert --conform -ns 1 ${T1wFolder}/aseg_acpc.nii.gz ${T1wFolder}/${Subject}/mri/aseg.mgz 
-
-log_Msg "Atlas Registration to MNI152 was removed and implemented in PostFreeSurfer so that it can make use of the better brain mask created in FreeSurfer"
-
-: <<'END'
-if ${useAntsReg} && ${useStudyTemplate}; then
-
-	# ------------------------------------------------------------------------------
-	#  Atlas Registration to MNI152: ANTs 
-	#  Also applies registration to T1w and T2w images 
-	#  Modified 20170330 by EF to include the option for a native mask in registration
-	# ------------------------------------------------------------------------------
-
-	log_Msg "Performing Atlas Registration to MNI152 (ANTs based with intermediate template)"
-
-	${RUN} ${HCPPIPEDIR_PreFS}/AtlasRegistrationToMNI152_ANTsIntermediateTemplate.sh \
-	    --workingdir=${AtlasSpaceFolder} \
-	    --t1=${T1wFolder}/${T1wImage}_acpc_dc.nii.gz \
-	    --t1rest=${T1wFolder}/${T1wImage}_acpc_dc_restore.nii.gz \
-	    --t1restbrain=${T1wFolder}/${T1wImage}_acpc_dc_restore_brain.nii.gz \
-	    --t2=${T1wFolder}/${T2wImage}_acpc_dc.nii.gz \
-	    --t2rest=${T1wFolder}/${T2wImage}_acpc_dc_restore.nii.gz \
-	    --t2restbrain=${T1wFolder}/${T2wImage}_acpc_dc_restore_brain.nii.gz \
-	    --studytemplate=${StudyTemplate} \
-	    --studytemplatebrain=${StudyTemplateBrain} \
-	    --ref=${T1wTemplate} \
-	    --refbrain=${T1wTemplateBrain} \
-	    --refmask=${TemplateMask} \
-	    --ref2mm=${T1wTemplate2mm} \
-	    --ref2mmbrain=${T1wTemplate2mmBrain} \
-	    --ref2mmmask=${Template2mmMask} \
-	    --owarp=${AtlasSpaceFolder}/xfms/acpc_dc2standard.nii.gz \
-	    --oinvwarp=${AtlasSpaceFolder}/xfms/standard2acpc_dc.nii.gz \
-	    --ot1=${AtlasSpaceFolder}/${T1wImage} \
-	    --ot1rest=${AtlasSpaceFolder}/${T1wImage}_restore \
-	    --ot1restbrain=${AtlasSpaceFolder}/${T1wImage}_restore_brain \
-	    --ot2=${AtlasSpaceFolder}/${T2wImage} \
-	    --ot2rest=${AtlasSpaceFolder}/${T2wImage}_restore \
-	    --ot2restbrain=${AtlasSpaceFolder}/${T2wImage}_restore_brain \
-	    --useT2=${useT2} \
-	    --T1wFolder=${T1wFolder}
-
-	log_Msg "Completed"
-
-else
-
-	# ------------------------------------------------------------------------------
-	#  Atlas Registration to MNI152: FLIRT + FNIRT  
-	#  Also applies registration to T1w and T2w images 
-	#  Modified 20170330 by EF to include the option for a native mask in registration
-	# ------------------------------------------------------------------------------
-
-	log_Msg "Performing Atlas Registration to MNI152 (ANTs based)"
-
-	${RUN} ${HCPPIPEDIR_PreFS}/AtlasRegistrationToMNI152_ANTsbased.sh \
-	    --workingdir=${AtlasSpaceFolder} \
-	    --t1=${T1wFolder}/${T1wImage}_acpc_dc \
-	    --t1rest=${T1wFolder}/${T1wImage}_acpc_dc_restore \
-	    --t1restbrain=${T1wFolder}/${T1wImage}_acpc_dc_restore_brain \
-        --t1mask=${T1wFolder}/${T1wImage}_acpc_brain_mask \
-	    --t2=${T1wFolder}/${T2wImage}_acpc_dc \
-	    --t2rest=${T1wFolder}/${T2wImage}_acpc_dc_restore \
-	    --t2restbrain=${T1wFolder}/${T2wImage}_acpc_dc_restore_brain \
-	    --ref=${T1wTemplate} \
-	    --refbrain=${T1wTemplateBrain} \
-	    --refmask=${TemplateMask} \
-	    --ref2mm=${T1wTemplate2mm} \
-	    --ref2mmbrain=${T1wTemplate2mmBrain} \
-	    --ref2mmmask=${Template2mmMask} \
-	    --owarp=${AtlasSpaceFolder}/xfms/acpc_dc2standard.nii.gz \
-	    --oinvwarp=${AtlasSpaceFolder}/xfms/standard2acpc_dc.nii.gz \
-	    --ot1=${AtlasSpaceFolder}/${T1wImage} \
-	    --ot1rest=${AtlasSpaceFolder}/${T1wImage}_restore \
-	    --ot1restbrain=${AtlasSpaceFolder}/${T1wImage}_restore_brain \
-	    --ot2=${AtlasSpaceFolder}/${T2wImage} \
-	    --ot2rest=${AtlasSpaceFolder}/${T2wImage}_restore \
-	    --ot2restbrain=${AtlasSpaceFolder}/${T2wImage}_restore_brain \
-	    --fnirtconfig=${FNIRTConfig} \
-	    --useT2=${useT2} \
-	    --T1wFolder=${T1wFolder} \
-	    --usemask=${usemask} \
-	    --useAntsReg=${useAntsReg}
-
-	log_Msg "Completed"
-
-fi
-END
+log_Msg "Completed"
 

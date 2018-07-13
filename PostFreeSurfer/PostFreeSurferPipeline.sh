@@ -61,11 +61,8 @@ CorrectionSigma=`opts_GetOpt1 "--mcsigma" $@`
 RegName=`opts_GetOpt1 "--regname" $@`
 InflateExtraScale=`opts_GetOpt1 "--inflatescale" $@`
 useT2=`opts_GetOpt1 "--useT2" $@`
-usemask=`opts_GetOpt1 "--usemask" $@`
-usemask=${usemask:-false}
 
 # Extra arguments for ANTs based Atlas Registration
-useAntsReg=`opts_GetOpt1 "--useAntsReg" $@`
 useStudyTemplate=`opts_GetOpt1 "--useStudyTemplate" $@`
 StudyTemplate=`opts_GetOpt1 "--studytemplate" $@`
 StudyTemplateBrain=`opts_GetOpt1 "--studytemplatebrain" $@`
@@ -152,7 +149,7 @@ log_Msg "Atlas Registration was taken out of PreFreeSurfer and reimplemented her
 
 # Run ANTS Atlas Registration from PreFreeSurfer using the freesurfer mask (brainmask_fs.nii.gz)
 
-if ${useAntsReg} && ${useStudyTemplate:-false}; then
+if ${useStudyTemplate:-false}; then
 
         # ------------------------------------------------------------------------------
         #  Atlas Registration to MNI152: ANTs with Intermediate Template
@@ -196,7 +193,7 @@ else
 
         # ------------------------------------------------------------------------------
         #  Atlas Registration to MNI152: FLIRT + FNIRT
-        #  Also applies registration to T1w and T2w images
+        #  Also applies registration to T1w and T2w image
         #  Modified 20170330 by EF to include the option for a native mask in registration
         # ------------------------------------------------------------------------------
 
