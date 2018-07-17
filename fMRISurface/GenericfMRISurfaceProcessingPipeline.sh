@@ -86,8 +86,8 @@ DownSampleFolder="fsaverage_LR${LowResMesh}k"
 ROIFolder="ROIs"
 OutputAtlasDenseTimeseries="${NameOffMRI}_Atlas"
 
-AtlasSpaceFolder="$Path"/"$Subject"/"$AtlasSpaceFolder"
-T1wFolder="$Path"/"$Subject"/"$T1wFolder"
+AtlasSpaceFolder="$Path"/"$AtlasSpaceFolder"
+T1wFolder="$Path"/"$T1wFolder"
 ResultsFolder="$AtlasSpaceFolder"/"$ResultsFolder"/"$NameOffMRI"
 ROIFolder="$AtlasSpaceFolder"/"$ROIFolder"
 

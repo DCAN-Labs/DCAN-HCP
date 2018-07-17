@@ -195,11 +195,11 @@ OutputfMRI2StandardTransform="${NameOffMRI}2standard"
 Standard2OutputfMRITransform="standard2${NameOffMRI}"
 QAImage="T1wMulEPI"
 JacobianOut="Jacobian"
-SubjectFolder="$Path"/"$Subject"
+SubjectFolder="$Path"
 #note, this file doesn't exist yet, gets created by ComputeSpinEchoBiasField.sh during DistortionCorrectionAnd...
 sebasedBiasFieldMNI="$SubjectFolder/$AtlasSpaceFolder/Results/$NameOffMRI/${NameOffMRI}_sebased_bias.nii.gz"
 
-fMRIFolder="$Path"/"$Subject"/"$NameOffMRI"
+fMRIFolder="$Path"/"$NameOffMRI"
 
 #error check bias correction opt
 case "$BiasCorrection" in
@@ -232,8 +232,8 @@ esac
 
 ########################################## DO WORK ########################################## 
 
-T1wFolder="$Path"/"$Subject"/"$T1wFolder"
-AtlasSpaceFolder="$Path"/"$Subject"/"$AtlasSpaceFolder"
+T1wFolder="$Path"/"$T1wFolder"
+AtlasSpaceFolder="$Path"/"$AtlasSpaceFolder"
 ResultsFolder="$AtlasSpaceFolder"/"$ResultsFolder"/"$NameOffMRI"
 
 mkdir -p ${T1wFolder}/Results/${NameOffMRI}
@@ -253,7 +253,7 @@ fi
 
 #Gradient Distortion Correction of fMRI
 log_Msg "Gradient Distortion Correction of fMRI"
-if [ ! $GradientDistortionCoeffs = "NONE" ] ; then
+if [ ! $( echo $GradientDistortionCoeffs | tr '[:lower:]' '[:upper:]' ) = "NONE" ] ; then
     log_Msg "mkdir -p ${fMRIFolder}/GradientDistortionUnwarp"
     mkdir -p "$fMRIFolder"/GradientDistortionUnwarp
     ${RUN} "$GlobalScripts"/GradientDistortionUnwarp.sh \

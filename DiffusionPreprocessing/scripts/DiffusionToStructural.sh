@@ -25,10 +25,10 @@ defaultopt() {
 ################################################## OPTION PARSING #####################################################
 # Input Variables
 
-FreeSurferSubjectFolder=`getopt1 "--t1folder" $@`  # "$1" #${StudyFolder}/${Subject}/T1w
+FreeSurferSubjectFolder=`getopt1 "--t1folder" $@`  # "$1" #${StudyFolder}/T1w
 FreeSurferSubjectID=`getopt1 "--subject" $@`       # "$2" #Subject ID
-WorkingDirectory=`getopt1 "--workingdir" $@`       # "$3" #Path to registration working dir, e.g. ${StudyFolder}/${Subject}/Diffusion/reg
-DataDirectory=`getopt1 "--datadiffdir" $@`         # "$4" #Path to diffusion space diffusion data, e.g. ${StudyFolder}/${Subject}/Diffusion/data
+WorkingDirectory=`getopt1 "--workingdir" $@`       # "$3" #Path to registration working dir, e.g. ${StudyFolder}/Diffusion/reg
+DataDirectory=`getopt1 "--datadiffdir" $@`         # "$4" #Path to diffusion space diffusion data, e.g. ${StudyFolder}/Diffusion/data
 T1wImage=`getopt1 "--t1" $@`                       # "$5" #T1w_acpc_dc image
 T1wRestoreImage=`getopt1 "--t1restore" $@`         # "$6" #T1w_acpc_dc_restore image
 T1wBrainImage=`getopt1 "--t1restorebrain" $@`      # "$7" #T1w_acpc_dc_restore_brain image

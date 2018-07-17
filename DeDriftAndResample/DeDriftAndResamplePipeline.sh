@@ -445,10 +445,10 @@ main()
 	CorrectionSigma=$(echo "sqrt ( 200 )" | bc -l)
 	log_Msg "CorrectionSigma: ${CorrectionSigma}"
 
-	AtlasFolder="${StudyFolder}/${Subject}/MNINonLinear"
+	AtlasFolder="${StudyFolder}/MNINonLinear"
 	log_Msg "AtlasFolder: ${AtlasFolder}"
 
-	T1wFolder="${StudyFolder}/${Subject}/T1w"
+	T1wFolder="${StudyFolder}/T1w"
 	log_Msg "T1wFolder: ${T1wFolder}"
 
 	NativeFolder="${AtlasFolder}/Native"

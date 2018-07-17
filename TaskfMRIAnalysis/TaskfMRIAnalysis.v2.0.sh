@@ -105,7 +105,7 @@ LevelOnefMRINames=`echo $LevelOnefMRINames | sed 's/@/ /g'`
 LevelOnefsfNames=`echo $LevelOnefsfNames | sed 's/@/ /g'`
 
 #Naming Conventions
-AtlasFolder="${Path}/${Subject}/MNINonLinear"
+AtlasFolder="${Path}/MNINonLinear"
 ResultsFolder="${AtlasFolder}/Results"
 ROIsFolder="${AtlasFolder}/ROIs"
 DownSampleFolder="${AtlasFolder}/fsaverage_LR${LowResMesh}k"

@@ -527,11 +527,11 @@ main()
 	
 	# Naming Conventions and other variables
 	Caret7_Command=${CARET7DIR}/wb_command
-	AtlasFolder="${StudyFolder}/${Subject}/MNINonLinear"
+	AtlasFolder="${StudyFolder}/MNINonLinear"
 	DownSampleFolder="${AtlasFolder}/fsaverage_LR${LowResMesh}k"
 	NativeFolder="${AtlasFolder}/Native"
 	ResultsFolder="${AtlasFolder}/Results/${OutputfMRIName}"
-	T1wFolder="${StudyFolder}/${Subject}/T1w"
+	T1wFolder="${StudyFolder}/T1w"
 	DownSampleT1wFolder="${T1wFolder}/fsaverage_LR${LowResMesh}k"
 	NativeT1wFolder="${T1wFolder}/Native"
 
@@ -729,7 +729,7 @@ main()
 						matlab_function_arguments+=" '${BC}'"
 						matlab_function_arguments+=" '${VolParams}'"
 
-						matlab_logging=">> ${StudyFolder}/${Subject}.MSMregression.matlab.C.Iteration${i}.log 2>&1"
+						matlab_logging=">> ${StudyFolder}.MSMregression.matlab.C.Iteration${i}.log 2>&1"
 
 						matlab_cmd="${matlab_exe} ${matlab_compiler_runtime} ${matlab_function_arguments} ${matlab_logging}"
 
@@ -827,7 +827,7 @@ M_PROG
 						matlab_function_arguments+=" '${BC}'"
 						matlab_function_arguments+=" '${VolParams}'"
 
-						matlab_logging=">> ${StudyFolder}/${Subject}.MSMregression.matlab.T.Iteration${i}.log 2>&1"
+						matlab_logging=">> ${StudyFolder}.MSMregression.matlab.T.Iteration${i}.log 2>&1"
 
 						matlab_cmd="${matlab_exe} ${matlab_compiler_runtime} ${matlab_function_arguments} ${matlab_logging}"
 						
@@ -1245,7 +1245,7 @@ M_PROG
 				matlab_function_arguments+=" '${BC}'"
    				matlab_function_arguments+=" '${VolParams}'"
 
-				matlab_logging=">> ${StudyFolder}/${Subject}.MSMregression.matlab.1.log 2>&1"
+				matlab_logging=">> ${StudyFolder}.MSMregression.matlab.1.log 2>&1"
 
 				matlab_cmd="${matlab_exe} ${matlab_compiler_runtime} ${matlab_function_arguments} ${matlab_logging}"
 
@@ -1326,7 +1326,7 @@ M_PROG
 				matlab_function_arguments+=" '${BC}'"
 				matlab_function_arguments+=" '${VolParams}'"
 
-				matlab_logging=">> ${StudyFolder}/${Subject}.MSMregression.matlab.2.log 2>&1"
+				matlab_logging=">> ${StudyFolder}.MSMregression.matlab.2.log 2>&1"
 
 				matlab_cmd="${matlab_exe} ${matlab_compiler_runtime} ${matlab_function_arguments} ${matlab_logging}"
 

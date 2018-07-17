@@ -246,7 +246,7 @@ have_hand_reclassification()
 	local fMRIName="${3}"
 	local HighPass="${4}"
 
-	[ -e "${StudyFolder}/${Subject}/MNINonLinear/Results/${fMRIName}/${fMRIName}_hp${HighPass}.ica/HandNoise.txt" ]
+	[ -e "${StudyFolder}/MNINonLinear/Results/${fMRIName}/${fMRIName}_hp${HighPass}.ica/HandNoise.txt" ]
 }
 
 # ------------------------------------------------------------------------------
@@ -324,7 +324,7 @@ main()
 	local fmri=${fMRIName}
 
 	DIR=$(pwd)
-	cd ${StudyFolder}/${Subject}/MNINonLinear/Results/${fMRIName}/${fMRIName}_hp${HighPass}.ica
+	cd ${StudyFolder}/MNINonLinear/Results/${fMRIName}/${fMRIName}_hp${HighPass}.ica
 
 	if [ -f ../${fmri_orig}_Atlas${RegString}.dtseries.nii ] ; then
 		log_Msg "FOUND FILE: ../${fmri_orig}_Atlas${RegString}.dtseries.nii"
@@ -361,7 +361,7 @@ main()
 				matlab_function_arguments="'${fixlist}' ${aggressive} ${domot} ${hp}"
 			fi
 
-			local matlab_logging=">> ${StudyFolder}/${Subject}_${fMRIName}_${HighPass}${RegString}.fix_3_clean.matlab.log 2>&1"
+			local matlab_logging=">> ${StudyFolder}_${fMRIName}_${HighPass}${RegString}.fix_3_clean.matlab.log 2>&1"
 			local matlab_cmd="${matlab_exe} ${MATLAB_COMPILER_RUNTIME} ${matlab_function_arguments} ${matlab_logging}"
 
 			# Note: Simply using ${matlab_cmd} here instead of echo "${matlab_cmd}" | bash
@@ -398,8 +398,8 @@ M_PROG
 			;;
 	esac
 
-	fmri="${StudyFolder}/${Subject}/MNINonLinear/Results/${fMRIName}/${fMRIName}_hp${HighPass}"
-	fmri_orig="${StudyFolder}/${Subject}/MNINonLinear/Results/${fMRIName}/${fMRIName}"
+	fmri="${StudyFolder}/MNINonLinear/Results/${fMRIName}/${fMRIName}_hp${HighPass}"
+	fmri_orig="${StudyFolder}/MNINonLinear/Results/${fMRIName}/${fMRIName}"
 	if [ -f ${fmri}.ica/Atlas_clean.dtseries.nii ] ; then
 		/bin/mv ${fmri}.ica/Atlas_clean.dtseries.nii ${fmri_orig}_Atlas${RegString}_hp${hp}_clean.dtseries.nii
 	fi

@@ -7,8 +7,8 @@ set -e
 # . SetUpHCPPipeline.sh
 # StudyFolder=/data/Phase2_7T
 # Subject=102311
-# T1wFolder="$StudyFolder"/"$Subject"/T1w
-# AtlasSpaceFolder="$StudyFolder"/"$Subject"/MNINonLinear
+# T1wFolder="$StudyFolder"/T1w
+# AtlasSpaceFolder="$StudyFolder"/MNINonLinear
 # LowResMeshes=59
 # Example_1res_inflate.sh  $StudyFolder $Subject $T1wFolder $AtlasSpaceFolder $LowResMeshes
 

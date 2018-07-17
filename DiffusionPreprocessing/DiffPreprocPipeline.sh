@@ -63,10 +63,10 @@
 # 
 # Main output directories
 # 
-# * <code>DiffFolder=${StudyFolder}/${Subject}/Diffusion</code>
-# * <code>T1wDiffFolder=${StudyFolder}/${Subject}/T1w/Diffusion</code>
+# * <code>DiffFolder=${StudyFolder}/Diffusion</code>
+# * <code>T1wDiffFolder=${StudyFolder}/T1w/Diffusion</code>
 # 
-# All outputs are within the directory: <code>${StudyFolder}/${Subject}</code>
+# All outputs are within the directory: <code>${StudyFolder}</code>
 # 
 # The full list of output directories are the following
 # 
@@ -78,7 +78,7 @@
 # * <code>$T1wDiffFolder</code>
 # 
 # Also assumes that T1 preprocessing has been carried out with results in 
-# <code>${StudyFolder}/${Subject}/T1w</code>
+# <code>${StudyFolder}/T1w</code>
 # 
 # <!-- References -->
 # 

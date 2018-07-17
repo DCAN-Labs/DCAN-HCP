@@ -279,7 +279,7 @@ main()
 	log_Msg "MatlabRunMode: ${MatlabRunMode}"
 
 	# Naming Conventions and other variables
-	local AtlasFolder="${StudyFolder}/${Subject}/MNINonLinear"
+	local AtlasFolder="${StudyFolder}/MNINonLinear"
 	log_Msg "AtlasFolder: ${AtlasFolder}"
 
 	local ResultsFolder="${AtlasFolder}/Results/${fMRIName}"
@@ -369,7 +369,7 @@ main()
 			matlab_function_arguments+=" ${TR} "
 
 			local matlab_logging
-			matlab_logging=">> ${StudyFolder}/${Subject}_${fMRIName}.matlab.log 2>&1"
+			matlab_logging=">> ${StudyFolder}_${fMRIName}.matlab.log 2>&1"
 
 			local matlab_cmd
 			matlab_cmd="${matlab_exe} ${matlab_compiler_runtime} ${matlab_function_arguments} ${matlab_logging}"

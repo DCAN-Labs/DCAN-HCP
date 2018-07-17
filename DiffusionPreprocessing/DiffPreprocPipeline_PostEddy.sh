@@ -332,8 +332,8 @@ main()
 	log_SetToolName "${SCRIPT_NAME}"
 	
 	# Establish output directory paths
-	outdir=${StudyFolder}/${Subject}/${DWIName}
-	outdirT1w=${StudyFolder}/${Subject}/T1w/${DWIName}
+	outdir=${StudyFolder}/${DWIName}
+	outdirT1w=${StudyFolder}/T1w/${DWIName}
 	
 	# Determine whether Gradient Nonlinearity Distortion coefficients are supplied
 	GdFlag=0
@@ -346,7 +346,7 @@ main()
 	${runcmd} ${HCPPIPEDIR_dMRI}/eddy_postproc.sh ${outdir} ${GdCoeffs} ${CombineDataFlag}
 	
 	# Establish variables that follow naming conventions
-	T1wFolder="${StudyFolder}/${Subject}/T1w" #Location of T1w images
+	T1wFolder="${StudyFolder}/T1w" #Location of T1w images
 	T1wImage="${T1wFolder}/T1w_acpc_dc"
 	T1wRestoreImage="${T1wFolder}/T1w_acpc_dc_restore"
 	T1wRestoreImageBrain="${T1wFolder}/T1w_acpc_dc_restore_brain"

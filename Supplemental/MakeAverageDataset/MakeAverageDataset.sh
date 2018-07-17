@@ -475,7 +475,7 @@ main()
 
 		MergeVolumeSTRING=""
 		for Subject in ${Subjlist} ; do
-		MergeVolumeSTRING=`echo "${MergeVolumeSTRING}${StudyFolder}/${Subject}/MNINonLinear/${Volume}.nii.gz "`
+		MergeVolumeSTRING=`echo "${MergeVolumeSTRING}${StudyFolder}/MNINonLinear/${Volume}.nii.gz "`
 		done
 		allvolumes=${CommonAtlasFolder}/${GroupAverageName}_All${Volume}.nii.gz
 		avgvolume=${CommonAtlasFolder}/${GroupAverageName}_Average${Volume}.nii.gz
@@ -514,7 +514,7 @@ main()
 		if [ -z "${NoLabelVols}" ]; then
 			MergeVolumeSTRING=""
 			for Subject in ${Subjlist} ; do
-				MergeVolumeSTRING=`echo "${MergeVolumeSTRING}${StudyFolder}/${Subject}/MNINonLinear/${Volume}.nii.gz "`
+				MergeVolumeSTRING=`echo "${MergeVolumeSTRING}${StudyFolder}/MNINonLinear/${Volume}.nii.gz "`
 			done
 			allvolumes=${CommonAtlasFolder}/${GroupAverageName}_All${Volume}.nii.gz
 			avgvolume=${CommonAtlasFolder}/${GroupAverageName}_Average${Volume}.nii.gz
@@ -610,7 +610,7 @@ main()
 				SurfaceSTRING=""
 				for Subject in $Subjlist ; do
 					#log_Msg "Subject: ${Subject}"
-					AtlasFolder="${StudyFolder}/${Subject}/MNINonLinear"
+					AtlasFolder="${StudyFolder}/MNINonLinear"
 					if [ $Mesh = ${HighResMesh} ] ; then
 						Folder=${AtlasFolder}
 					else
@@ -621,7 +621,7 @@ main()
 							fi
 							i=$(($i+1))
 						done
-						DownSampleFolder="${StudyFolder}/${Subject}/MNINonLinear/${DownSampleFolderName}"
+						DownSampleFolder="${StudyFolder}/MNINonLinear/${DownSampleFolderName}"
 						Folder=${DownSampleFolder}
 					fi
 					SurfaceSTRING=`echo "${SurfaceSTRING} -surf ${Folder}/${Subject}.${Hemisphere}.${Surface}${RegSTRING}.${Mesh}k_fs_LR.surf.gii "`
@@ -727,8 +727,8 @@ main()
 
 			log_Msg "Subject: ${Subject}; Mesh: ${Mesh}"
 
-			AtlasFolder="${StudyFolder}/${Subject}/MNINonLinear"
-			T1wFolder="${StudyFolder}/${Subject}/T1w"
+			AtlasFolder="${StudyFolder}/MNINonLinear"
+			T1wFolder="${StudyFolder}/T1w"
 			if [ $Mesh = ${HighResMesh} ] ; then
 				Folder="${T1wFolder}"
 				MNIFolder="${AtlasFolder}"
@@ -777,8 +777,8 @@ main()
 					fi
 					i=$(($i+1))
 				done
-				DownSampleFolder="${StudyFolder}/${Subject}/T1w/${DownSampleFolderName}"
-				MNIDownSampleFolder="${StudyFolder}/${Subject}/MNINonLinear/${DownSampleFolderName}"
+				DownSampleFolder="${StudyFolder}/T1w/${DownSampleFolderName}"
+				MNIDownSampleFolder="${StudyFolder}/MNINonLinear/${DownSampleFolderName}"
 				Folder=${DownSampleFolder}
 				MNIFolder=${MNIDownSampleFolder}
 				for Hemisphere in L R ; do
@@ -823,8 +823,8 @@ main()
 		# Cleanup/removal of individual subject va files
 		if [ $Mesh = ${HighResMesh} ] ; then
 			for Subject in ${Subjlist} ; do
-				T1wFolder="${StudyFolder}/${Subject}/T1w"
-				MNIFolder="${StudyFolder}/${Subject}/MNINonLinear"
+				T1wFolder="${StudyFolder}/T1w"
+				MNIFolder="${StudyFolder}/MNINonLinear"
 				rm ${T1wFolder}/${Subject}.midthickness${RegSTRING}_va.${Mesh}k_fs_LR.dscalar.nii
 				rm ${MNIFolder}/${Subject}.midthickness${RegSTRING}_va.${Mesh}k_fs_LR.dscalar.nii
 			done
@@ -836,7 +836,7 @@ main()
 				fi
 				i=$(($i+1))
 			done
-			MNIDownSampleFolder="${StudyFolder}/${Subject}/MNINonLinear/${DownSampleFolderName}"
+			MNIDownSampleFolder="${StudyFolder}/MNINonLinear/${DownSampleFolderName}"
 			MNIFolder=${MNIDownSampleFolder}
 			rm ${MNIFolder}/${Subject}.midthickness${RegSTRING}_va.${Mesh}k_fs_LR.dscalar.nii
 		fi
@@ -918,7 +918,7 @@ main()
 			fi
 			MapMerge=""
 			for Subject in ${Subjlist} ; do
-				AtlasFolder="${StudyFolder}/${Subject}/MNINonLinear"
+				AtlasFolder="${StudyFolder}/MNINonLinear"
 				if [ $Mesh = ${HighResMesh} ] ; then
 					Folder=${AtlasFolder}
 				else
@@ -929,7 +929,7 @@ main()
 						fi
 						i=$(($i+1))
 					done
-					DownSampleFolder="${StudyFolder}/${Subject}/MNINonLinear/${DownSampleFolderName}"
+					DownSampleFolder="${StudyFolder}/MNINonLinear/${DownSampleFolderName}"
 					Folder=${DownSampleFolder}
 				fi
 				MapMerge=`echo "${MapMerge} -cifti ${Folder}/${Subject}.${Map}${RegSTRING}.${Mesh}k_fs_LR.dscalar.nii"`

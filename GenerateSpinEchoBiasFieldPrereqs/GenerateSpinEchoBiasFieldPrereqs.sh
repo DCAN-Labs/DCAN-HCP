@@ -150,39 +150,39 @@ main()
 		for File in ${files} ; do
 			log_Msg "--File: ${File}"
 			
-			if [ ! -e ${StudyFolder}/${Subject}/T1w/Results/${fMRIName}/Import/${File} ]; then
-				if [ ! -e ${StudyFolder}/${Subject}/T1w/Results/${fMRIName}/Import ]; then
-					mkdir -p ${StudyFolder}/${Subject}/T1w/Results/${fMRIName}/Import
+			if [ ! -e ${StudyFolder}/T1w/Results/${fMRIName}/Import/${File} ]; then
+				if [ ! -e ${StudyFolder}/T1w/Results/${fMRIName}/Import ]; then
+					mkdir -p ${StudyFolder}/T1w/Results/${fMRIName}/Import
 				fi
-				if [ ! -e ${StudyFolder}/${Subject}/MNINonLinear/Results/${fMRIName}/Import ]; then
-					mkdir -p ${StudyFolder}/${Subject}/MNINonLinear/Results/${fMRIName}/Import
+				if [ ! -e ${StudyFolder}/MNINonLinear/Results/${fMRIName}/Import ]; then
+					mkdir -p ${StudyFolder}/MNINonLinear/Results/${fMRIName}/Import
 				fi
 
 				log_Msg "----Copy"
 				cp \
-					${StudyFolder}/${Subject}/${fMRIName}/DistortionCorrectionAndEPIToT1wReg_FLIRTBBRAndFreeSurferBBRbased/FieldMap/${File} \
-					${StudyFolder}/${Subject}/T1w/Results/${fMRIName}/Import/${File}
+					${StudyFolder}/${fMRIName}/DistortionCorrectionAndEPIToT1wReg_FLIRTBBRAndFreeSurferBBRbased/FieldMap/${File} \
+					${StudyFolder}/T1w/Results/${fMRIName}/Import/${File}
 
 				log_Msg "----convert_xfm"
 				${FSLDIR}/bin/convert_xfm -omat \
-					${StudyFolder}/${Subject}/T1w/Results/${fMRIName}/Import/fMRI2str.mat \
-					-concat ${StudyFolder}/${Subject}/${fMRIName}/DistortionCorrectionAndEPIToT1wReg_FLIRTBBRAndFreeSurferBBRbased/fMRI2str.mat \
-					        ${StudyFolder}/${Subject}/${fMRIName}/DistortionCorrectionAndEPIToT1wReg_FLIRTBBRAndFreeSurferBBRbased/Scout_gdc_undistorted.mat
+					${StudyFolder}/T1w/Results/${fMRIName}/Import/fMRI2str.mat \
+					-concat ${StudyFolder}/${fMRIName}/DistortionCorrectionAndEPIToT1wReg_FLIRTBBRAndFreeSurferBBRbased/fMRI2str.mat \
+					        ${StudyFolder}/${fMRIName}/DistortionCorrectionAndEPIToT1wReg_FLIRTBBRAndFreeSurferBBRbased/Scout_gdc_undistorted.mat
 
 				log_Msg "----applywarp 1"
 				${FSLDIR}/bin/applywarp --interp=spline \
-					-i ${StudyFolder}/${Subject}/T1w/Results/${fMRIName}/Import/${File} \
-					-r ${StudyFolder}/${Subject}/MNINonLinear/Results/${fMRIName}/${fMRIName}_SBRef.nii.gz \
-					--premat=${StudyFolder}/${Subject}/T1w/Results/${fMRIName}/Import/fMRI2str.mat \
-					-w ${StudyFolder}/${Subject}/MNINonLinear/xfms/acpc_dc2standard.nii.gz \
-					-o ${StudyFolder}/${Subject}/MNINonLinear/Results/${fMRIName}/Import/${File}
+					-i ${StudyFolder}/T1w/Results/${fMRIName}/Import/${File} \
+					-r ${StudyFolder}/MNINonLinear/Results/${fMRIName}/${fMRIName}_SBRef.nii.gz \
+					--premat=${StudyFolder}/T1w/Results/${fMRIName}/Import/fMRI2str.mat \
+					-w ${StudyFolder}/MNINonLinear/xfms/acpc_dc2standard.nii.gz \
+					-o ${StudyFolder}/MNINonLinear/Results/${fMRIName}/Import/${File}
 
 				log_Msg "----applywarp 2"
 				${FSLDIR}/bin/applywarp --interp=spline \
-					-i ${StudyFolder}/${Subject}/T1w/Results/${fMRIName}/Import/${File} \
-					-r ${StudyFolder}/${Subject}/T1w/T2w_acpc_dc.nii.gz \
-					--premat=${StudyFolder}/${Subject}/T1w/Results/${fMRIName}/Import/fMRI2str.mat \
-					-o ${StudyFolder}/${Subject}/T1w/Results/${fMRIName}/Import/${File}
+					-i ${StudyFolder}/T1w/Results/${fMRIName}/Import/${File} \
+					-r ${StudyFolder}/T1w/T2w_acpc_dc.nii.gz \
+					--premat=${StudyFolder}/T1w/Results/${fMRIName}/Import/fMRI2str.mat \
+					-o ${StudyFolder}/T1w/Results/${fMRIName}/Import/${File}
 
 			else
 				echo "--File already exists"
@@ -190,11 +190,11 @@ main()
 
 		done # File in ${files}
 
-		mv ${StudyFolder}/${Subject}/T1w/Results/${fMRIName}/Import/* ${StudyFolder}/${Subject}/T1w/Results/${fMRIName}
-		rmdir ${StudyFolder}/${Subject}/T1w/Results/${fMRIName}/Import
+		mv ${StudyFolder}/T1w/Results/${fMRIName}/Import/* ${StudyFolder}/T1w/Results/${fMRIName}
+		rmdir ${StudyFolder}/T1w/Results/${fMRIName}/Import
 
-		mv ${StudyFolder}/${Subject}/MNINonLinear/Results/${fMRIName}/Import/* ${StudyFolder}/${Subject}/MNINonLinear/Results/${fMRIName}
-		rmdir ${StudyFolder}/${Subject}/MNINonLinear/Results/${fMRIName}/Import
+		mv ${StudyFolder}/MNINonLinear/Results/${fMRIName}/Import/* ${StudyFolder}/MNINonLinear/Results/${fMRIName}
+		rmdir ${StudyFolder}/MNINonLinear/Results/${fMRIName}/Import
 
 	done # fMRIName in ${rfMRINames} ${tfMRINames}
 

@@ -276,7 +276,7 @@ main()
 		for Subject in ${Subjlist} ; do
 			log_Msg "Working on subject: ${Subject}"
 
-			AtlasFolder="${StudyFolder}/${Subject}/MNINonLinear"
+			AtlasFolder="${StudyFolder}/MNINonLinear"
 			log_Msg "AtlasFolder: ${AtlasFolder}"
 			NativeFolder="${AtlasFolder}/Native"
 			log_Msg "NativeFolder: ${NativeFolder}"

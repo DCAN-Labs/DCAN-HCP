@@ -361,8 +361,8 @@ main()
 	log_SetToolName "${SCRIPT_NAME}"
 	
 	# Establish output directory paths
-	outdir=${StudyFolder}/${Subject}/${DWIName}
-	outdirT1w=${StudyFolder}/${Subject}/T1w/${DWIName}
+	outdir=${StudyFolder}/${DWIName}
+	outdirT1w=${StudyFolder}/T1w/${DWIName}
 	
 	# Delete any existing output sub-directories
 	if [ -d ${outdir} ] ; then

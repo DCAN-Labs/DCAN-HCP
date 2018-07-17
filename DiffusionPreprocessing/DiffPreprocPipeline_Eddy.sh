@@ -423,7 +423,7 @@ main()
 	log_SetToolName "${SCRIPT_NAME}"
 	
 	# Establish output directory paths
-	outdir=${StudyFolder}/${Subject}/${DWIName}
+	outdir=${StudyFolder}/${DWIName}
 	
 	# Determine stats_option value to pass to run_eddy.sh script
 	if [ "${DetailedOutlierStats}" = "True" ] ; then

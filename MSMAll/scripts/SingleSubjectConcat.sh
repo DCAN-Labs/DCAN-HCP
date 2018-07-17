@@ -336,7 +336,7 @@ main()
 	fi
 	log_Msg "OutputProcSTRING: ${OutputProcSTRING}"
 
-	AtlasFolder="${StudyFolder}/${Subject}/MNINonLinear"
+	AtlasFolder="${StudyFolder}/MNINonLinear"
 	log_Msg "AtlasFolder: ${AtlasFolder}"
 
 	OutputFolder="${AtlasFolder}/Results/${OutputfMRIName}"
@@ -404,7 +404,7 @@ main()
 						
 						matlab_function_arguments="'${cleandtseries}' '${bias}' '${ICAtcs}' '${ICANoise}' '${OutputVN}' '${Caret7_Command}'"
 						
-						matlab_logging=">> ${StudyFolder}/${Subject}.ComputeVN.matlab.log 2>&1"
+						matlab_logging=">> ${StudyFolder}.ComputeVN.matlab.log 2>&1"
 						
 						matlab_cmd="${matlab_exe} ${matlab_compiler_runtime} ${matlab_function_arguments} ${matlab_logging}"
 						

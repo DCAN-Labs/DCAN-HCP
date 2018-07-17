@@ -89,11 +89,11 @@
 #
 # Command line arguments are used to specify the StudyFolder (--path) and 
 # the Subject (--subject).  All outputs are generated within the tree rooted
-# at ${StudyFolder}/${Subject}.  The main output directories are:
+# at ${StudyFolder}.  The main output directories are:
 #
-# * The T1wFolder: ${StudyFolder}/${Subject}/T1w
-# * The T2wFolder: ${StudyFolder}/${Subject}/T2w
-# * The AtlasSpaceFolder: ${StudyFolder}/${Subject}/MNINonLinear
+# * The T1wFolder: ${StudyFolder}/T1w
+# * The T2wFolder: ${StudyFolder}/T2w
+# * The AtlasSpaceFolder: ${StudyFolder}/MNINonLinear
 # 
 # All outputs are generated in directories at or below these three main 
 # output directories.  The full list of output directories is:
@@ -394,11 +394,11 @@ fi
 AtlasSpaceFolder="MNINonLinear"
 
 # Build Paths
-T1wFolder=${StudyFolder}/${Subject}/${T1wFolder}
+T1wFolder=${StudyFolder}/${T1wFolder}
 if $useT2; then
-T2wFolder=${StudyFolder}/${Subject}/${T2wFolder}
+T2wFolder=${StudyFolder}/${T2wFolder}
 fi
-AtlasSpaceFolder=${StudyFolder}/${Subject}/${AtlasSpaceFolder}
+AtlasSpaceFolder=${StudyFolder}/${AtlasSpaceFolder}
 
 log_Msg "T1wFolder: $T1wFolder"
 if $useT2; then
@@ -468,7 +468,7 @@ for TXw in ${Modalities} ; do
 
     # Perform Gradient Nonlinearity Correction 
 
-    if [ ! $GradientDistortionCoeffs = "NONE" ] ; then
+    if [ ! "$( echo ${GradientDistortionCoeffs} | tr '[:lower:]' '[:upper:]' )" = "NONE" ] ; then
         log_Msg "Performing Gradient Nonlinearity Correction"
 		
         i=1
