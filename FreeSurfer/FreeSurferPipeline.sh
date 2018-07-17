@@ -174,7 +174,12 @@ cp "$SubjectDIR"/"$SubjectID"/mri/brainmask.auto.mgz "$SubjectDIR"/"$SubjectID"/
 
 if [[ -z ${NSLOTS} ]]
 then
+  if [[ -z ${OMP_NUM_THREADS} ]]
+  then
     num_cores=8
+  else
+    num_cores="${OMP_NUM_THREADS}"
+  fi
 else
     num_cores="${NSLOTS}"
 fi
