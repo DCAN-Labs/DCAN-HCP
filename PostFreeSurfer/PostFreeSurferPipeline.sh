@@ -160,6 +160,30 @@ log_Msg "RegName: ${RegName}"
 
 log_Msg "Atlas Registration was taken out of PreFreeSurfer and reimplemented here in PostFreeSurfer because the new ANTs based method is improved when using the brain mask generated in FreeSurfer as opposed to the one generated in PreFreeSurfer"
 
+#Convert FreeSurfer Volumes
+#for Image in wmparc aparc.a2009s+aseg aparc+aseg ; do
+#        if [ -e "$FreeSurferFolder"/mri/"$Image".mgz ] ; then
+#                mri_convert -rt nearest -rl "$T1wFolder"/"$T1wImage".nii.gz "$FreeSurferFolder"/mri/"$Image".mgz "$T1wFolder"/"$Image"_1mm.nii.gz
+#                applywarp --rel --interp=nn -i "$T1wFolder"/"$Image"_1mm.nii.gz -r "$AtlasSpaceFolder"/"$AtlasSpaceT1wImage" --premat=$FSLDIR/etc/flirtsch/ident.mat -o "$T1wFolder"/"$Image".nii.gz
+#                applywarp --rel --interp=nn -i "$T1wFolder"/"$Image"_1mm.nii.gz -r "$AtlasSpaceFolder"/"$AtlasSpaceT1wImage" -w "$AtlasTransform" -o "$AtlasSpaceFolder"/"$Image".nii.gz
+#                ${CARET7DIR}/wb_command -volume-label-import "$T1wFolder"/"$Image".nii.gz "$FreeSurferLabels" "$T1wFolder"/"$Image".nii.gz -drop-unused-labels
+#                ${CARET7DIR}/wb_command -volume-label-import "$AtlasSpaceFolder"/"$Image".nii.gz "$FreeSurferLabels" "$AtlasSpaceFolder"/"$Image".nii.gz -drop-unused-labels
+#        fi
+#done
+
+#Create FreeSurfer Brain Mask. (Removed from FreeSurfer2CaretConvertAndRegisterNonlinear.sh)
+mri_convert -rt nearest -rl "$T1wFolder"/"$T1wRestoreImage".nii.gz "$FreeSurferFolder"/mri/wmparc.mgz "$T1wFolder"/wmparc_1mm.nii.gz
+fslmaths "$T1wFolder"/wmparc_1mm.nii.gz -bin -dilD -dilD -dilD -ero -ero "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz
+${CARET7DIR}/wb_command -volume-fill-holes "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz
+fslmaths "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz -bin "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz
+applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz -r "$T1wFolder"/"$T1wRestoreImage".nii.gz --premat=$FSLDIR/etc/flirtsch/ident.mat -o "$T1wFolder"/"$T1wImageBrainMask".nii.gz
+convertwarp --relout --rel --ref="$T1wFolder"/"$T1wImageBrainMask" --premat="$T1wFolder"/xfms/"$InitialT1wTransform" --warp1="$T1wFolder"/xfms/"$dcT1wTransform" --out="$T1wFolder"/xfms/"$OutputOrigT1wToT1w"
+applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz -r "$T1wFolder"/"$T1wRestoreImage".nii.gz -w "$AtlasTransform" -o "$AtlasSpaceFolder"/"$T1wImageBrainMask".nii.gz
+applywarp --rel --interp=spline -i "$T1wFolder"/"$OrginalT1wImage" -r "$T1wFolder"/"$T1wImageBrainMask" -w "$T1wFolder"/xfms/"$OutputOrigT1wToT1w" -o "$T1wFolder"/"$OutputT1wImage"
+fslmaths "$T1wFolder"/"$OutputT1wImage" -abs "$T1wFolder"/"$OutputT1wImage" -odt float
+fslmaths "$T1wFolder"/"$OutputT1wImage" -div "$T1wFolder"/"$BiasField" "$T1wFolder"/"$OutputT1wImageRestore"
+
+
 # Run ANTS Atlas Registration from PreFreeSurfer using the freesurfer mask (brainmask_fs.nii.gz)
 
 if ${useAntsReg} && ${useStudyTemplate:-false}; then

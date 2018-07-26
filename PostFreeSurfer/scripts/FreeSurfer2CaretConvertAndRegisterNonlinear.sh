@@ -167,7 +167,7 @@ for Image in wmparc aparc.a2009s+aseg aparc+aseg ; do
 	fi
 done
 
-#Create FreeSurfer Brain Mask
+#Create FreeSurfer Brain Mask (Now done in PostFreeSurfer.sh so brainmask_fs.nii.gz exists for ANTs Registration)
 fslmaths "$T1wFolder"/wmparc_1mm.nii.gz -bin -dilD -dilD -dilD -ero -ero "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz
 ${CARET7DIR}/wb_command -volume-fill-holes "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz
 fslmaths "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz -bin "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz
