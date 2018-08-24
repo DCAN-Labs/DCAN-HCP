@@ -159,7 +159,7 @@ mkdir -p $TempSubjectDIR
 recon-all -i "$T1wImageFile"_1mm.nii.gz -subjid $SubjectID -sd $TempSubjectDIR -motioncor -talairach -nuintensitycor -normalization ${seed_cmd_appendix} # FAIR LAB RECON-ALL STEP # Replaced by Eric Earl 12/20/2016
 
 # FAIR LAB POST RECON-ALL STEPS # Added by Eric Earl 12/20/2016
-mv "$TempSubjectDIR"/"$SubjectID" $SubjectDIR/
+mv "$TempSubjectDIR"/"$SubjectID" $SubjectDIR/ || cp -r "$TempSubjectDIR"/"$SubjectID" $SubjectDIR/
 rm -rf $TempSubjectDIR
 
 # Generate brain mask

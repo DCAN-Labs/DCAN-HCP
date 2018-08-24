@@ -147,6 +147,16 @@ log_Msg "RegName: ${RegName}"
 
 log_Msg "Atlas Registration was taken out of PreFreeSurfer and reimplemented here in PostFreeSurfer because the new ANTs based method is improved when using the brain mask generated in FreeSurfer as opposed to the one generated in PreFreeSurfer"
 
+#Create FreeSurfer Brain Mask. (Removed from FreeSurfer2CaretConvertAndRegisterNonlinear.sh)
+mri_convert -rt nearest -rl "$T1wFolder"/"$T1wImage".nii.gz "$FreeSurferFolder"/mri/wmparc.mgz "$T1wFolder"/wmparc_1mm.nii.gz
+applywarp --rel --interp=nn -i "$T1wFolder"/wmparc_1mm.nii.gz -r "$AtlasSpaceFolder"/"$AtlasSpaceT1wImage" --premat=$FSLDIR/etc/flirtsch/ident.mat -o "$T1wFolder"/wmparc.nii.gz
+
+fslmaths "$T1wFolder"/wmparc_1mm.nii.gz -bin -dilD -dilD -dilD -ero -ero "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz
+${CARET7DIR}/wb_command -volume-fill-holes "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz
+fslmaths "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz -bin "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz
+applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz -r "$AtlasSpaceFolder"/"$AtlasSpaceT1wImage" --premat=$FSLDIR/etc/flirtsch/ident.mat -o "$T1wFolder"/"$T1wImageBrainMask".nii.gz
+applywarp --rel --interp=nn -i "$T1wFolder"/"$T1wImageBrainMask"_1mm.nii.gz -r "$AtlasSpaceFolder"/"$AtlasSpaceT1wImage" -w "$AtlasTransform" -o "$AtlasSpaceFolder"/"$T1wImageBrainMask".nii.gz
+
 # Run ANTS Atlas Registration from PreFreeSurfer using the freesurfer mask (brainmask_fs.nii.gz)
 
 if ${useStudyTemplate:-false}; then
