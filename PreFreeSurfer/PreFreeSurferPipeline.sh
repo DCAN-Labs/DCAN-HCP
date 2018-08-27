@@ -693,6 +693,8 @@ else
     fslmaths ${T1wFolder}/T1w_acpc_brain_mask.nii.gz -mul -1 -add 1 ${T1wFolder}/T1w_acpc_inverse_brain_mask.nii.gz
     fslmaths ${T1wFolder}/T1w_acpc_dc.nii.gz -mul ${T1wFolder}/T1w_acpc_inverse_brain_mask.nii.gz ${T1wFolder}/T1w_acpc_dc_skull.nii.gz
     fslmaths ${T1wFolder}/T1w_fast_restore.nii.gz -add ${T1wFolder}/T1w_acpc_dc_skull.nii.gz ${T1wFolder}/${T1wImage}_acpc_dc_restore
+    #${RUN} ${FSLDIR}/bin/imcp ${T1wFolder}/${T1wImage}_acpc_dc ${T1wFolder}/${T1wImage}_acpc_dc_PreN4
+    #${RUN} ${ANTSPATH}${ANTSPATH:+/}N4BiasFieldCorrection -d 3 -i ${T1wFolder}/${T1wImage}_acpc_dc_PreN4.nii.gz -x ${T1wFolder}/${T1wImage}_acpc_dc_brain_mask.nii.gz -o [${T1wFolder}/${T1wImage}_acpc_dc_restore.nii.gz,${TXwFolder}/N4BiasField.nii.gz]
 fi
 
 log_Msg "Completed"
