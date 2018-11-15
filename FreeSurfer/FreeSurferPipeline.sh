@@ -120,6 +120,9 @@ mri_watershed_version=`mri_watershed --version`
 log_Msg "which mri_watershed: ${which_mri_watershed}"
 log_Msg "mri_watershed --version: ${mri_watershed_version}"
 
+# change cwd to SubjectDir so log files output from recon-all are created in the subject's directory
+pushd ${SubjectDIR}
+
 # Start work
 
 T1wImageFile=`remove_ext $T1wImage`;
@@ -205,5 +208,8 @@ fi
 log_Msg "Final Recon-all Steps"
 recon-all -subjid $SubjectID -sd $SubjectDIR -surfvolume -parcstats -cortparc2 -parcstats2 -cortparc3 -parcstats3 -cortribbon -segstats -aparc2aseg -wmparc -balabels -label-exvivo-ec -openmp ${num_cores} ${seed_cmd_appendix}
 
+popd
+
 log_Msg "Completed"
+
 

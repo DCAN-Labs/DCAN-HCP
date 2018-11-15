@@ -25,7 +25,7 @@ MotionCorrectionType="$8"
 
 OutputfMRIBasename=`basename ${OutputfMRI}`
 
-
+pushd ${WorkingDirectory}
 
 # Do motion correction
 log_Msg "Do motion correction"
@@ -167,4 +167,5 @@ function DeriveUnBiased {
   mv ${out}_ ${out}
   rm $random
 }
+popd
 

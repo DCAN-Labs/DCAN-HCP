@@ -372,7 +372,6 @@ log_Msg "BiasFieldSmoothingSigma: ${BiasFieldSmoothingSigma}"
 log_Msg "UseJacobian: ${UseJacobian}"
 log_Msg "useT2: ${useT2}"
 log_Msg "usemask: ${usemask}"
-log_Msg "useAntsReg: ${useAntsReg}"
 log_Msg "useStudyTemplate: ${useStudyTemplate}"
 
 # ------------------------------------------------------------------------------
@@ -536,7 +535,7 @@ for TXw in ${Modalities} ; do
         --omat=${TXwFolder}/xfms/acpc.mat \
         --brainsize=${BrainSize}
 
-    if ${useAntsReg} && ${useStudyTemplate}; then
+    if ${useStudyTemplate}; then
 	   # Brain Extraction(ANTs-based Masking)
 	   log_Msg "Performing Brain Extraction using ANTs-based Masking"
 	   log_Msg "mkdir -p ${TXwFolder}/BrainExtraction_ANTsbased"
