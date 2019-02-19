@@ -1,12 +1,13 @@
 # DCAN-HCP Pipelines 
 
-The HCP Pipelines product is a set of tools (primarily, but not exclusively,
-shell scripts) for processing MRI images for the [Human Connectome Project][HCP]. 
-Among other things, these tools implement the Minimal Preprocessing Pipeline 
-(MPP) described in [Glasser et al. 2013][GlasserEtAl].  **The original pipeline
+This repository is the DCAN labs' modified HCP Pipelines for the processing of functional MRI images.
+
+The original HCP Pipelines is a set of tools (primarily, but not exclusively,
+shell scripts) for processing MRI images for the [Human Connectome Project][HCP], 
+as outlined in [Glasser et al. 2013][GlasserEtAl].  **The original pipeline
 software is available [here](https://github.com/Washington-University/HCPpipelines)**
 
-In particular, this repository includes several modifications of primary shell 
+In particular, the DCAN labs repository includes several modifications of primary shell 
 scripts for processing functional MRI data.
 
 The changes include:
