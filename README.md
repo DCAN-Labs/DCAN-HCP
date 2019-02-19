@@ -17,3 +17,9 @@ The changes include:
 - several additional options for processing
 
 This is the backend component for the processing of data. It is not designed for direct use as a user interface. For the pipeline interface in the form of a dockerized bids application, please refer to [the official application repository](https://github.com/DCAN-Labs/dcan-fmri-pipelines).
+
+
+<!-- References -->
+
+[HCP]: http://www.humanconnectome.org
+[GlasserEtAl]: http://www.ncbi.nlm.nih.gov/pubmed/23668970
