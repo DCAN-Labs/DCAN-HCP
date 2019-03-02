@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 set -e
 
 # --------------------------------------------------------------------------------
@@ -33,11 +33,11 @@ case "$MotionCorrectionType" in
     MCFLIRT)
         ${HCPPIPEDIR_Global}/mcflirt.sh ${InputfMRI} ${WorkingDirectory}/${OutputfMRIBasename} ${Scout}
     ;;
-    
+
     FLIRT)
         ${HCPPIPEDIR_Global}/mcflirt_acc.sh ${InputfMRI} ${WorkingDirectory}/${OutputfMRIBasename} ${Scout}
     ;;
-    
+
     *)
         log_Msg "ERROR: MotionCorrectionType must be 'MCFLIRT' or 'FLIRT'"
         exit 1
@@ -80,8 +80,8 @@ function DeriveBackwards {
   Length=`echo $Var | wc -w`
   # TCS becomes an array of the values from column $i in $in (derived from Var)
   TCS=($Var)
-  # random is a random file name for temporary output
-  random=$RANDOM
+  # make a file for temporary output
+  tempfile=temp$$
 
   # Cycle through our array of values from column $i
   j=0
@@ -95,7 +95,7 @@ function DeriveBackwards {
       # Format numeric value (convert scientific notation to decimal) jth row of ith column
       # in $in (mcpar)
       Forward=`echo ${TCS[$j]} | awk -F"E" 'BEGIN{OFMT="%10.10f"} {print $1 * (10 ^ $2)}'`
-    
+
       # Similarly format numeric value for previous row (j-1)
       Back=`echo ${TCS[$(($j-1))]} | awk -F"E" 'BEGIN{OFMT="%10.10f"} {print $1 * (10 ^ $2)}'`
 
@@ -104,12 +104,12 @@ function DeriveBackwards {
     fi
     # 0 prefix the resulting number
     Answer=`echo $Answer | sed s/"^\."/"0."/g | sed s/"^-\."/"-0."/g`
-    echo `printf "%10.6f" $Answer` >> $random
+    echo `printf "%10.6f" $Answer` >> $tempfile
     j=$(($j + 1))
   done
-  paste -d " " $out $random > ${out}_
+  paste -d " " $out $tempfile > ${out}_
   mv ${out}_ ${out}
-  rm $random
+  rm $tempfile
 }
 
 # Run the Derive function to generate appropriate regressors from the par file
@@ -143,7 +143,7 @@ function DeriveUnBiased {
   Length=`echo $Var | wc -w`
   length1=$(($Length - 1))
   TCS=($Var)
-  random=$RANDOM
+  tempfile=temp$$
   j=0
   while [ $j -le $length1 ] ; do
     if [ $j -eq 0 ] ; then # This is the forward derivative for the first row
@@ -160,12 +160,12 @@ function DeriveUnBiased {
       Answer=`echo "scale=10; ( $Forward - $Back ) / 2" | bc -l`
     fi
     Answer=`echo $Answer | sed s/"^\."/"0."/g | sed s/"^-\."/"-0."/g`
-    echo `printf "%10.6f" $Answer` >> $random
+    echo `printf "%10.6f" $Answer` >> $tempfile
     j=$(($j + 1))
   done
-  paste -d " " $out $random > ${out}_
+  paste -d " " $out $tempfile > ${out}_
   mv ${out}_ ${out}
-  rm $random
+  rm $tempfile
 }
 popd
 

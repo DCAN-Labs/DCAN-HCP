@@ -34,11 +34,11 @@ mri_convert "$mridir"/T2w_hires.norm.nii.gz "$mridir"/T2w_hires.norm.mgz
 
 
 ## Overview of what follows:
-## 1) First pass attempts to capture all grey matter (and plenty of vessels/dura) with permissive variable sigma.  
-## 2) Remove vessels and dura using T2w image.  
+## 1) First pass attempts to capture all grey matter (and plenty of vessels/dura) with permissive variable sigma.
+## 2) Remove vessels and dura using T2w image.
 ## 3) Normalize T1w image to reduce the effects of low spatial-frequency myelin content changes.
-## 4) Generate second pass pial surface using more precise gaussian tissue distributions 
-##    (grey matter peak is narrower because of less variability in myelin content).  
+## 4) Generate second pass pial surface using more precise gaussian tissue distributions
+##    (grey matter peak is narrower because of less variability in myelin content).
 ## 5) Remove veins and dura from pial surface using T2w image again.
 
 ## ------ First pass ------
@@ -57,12 +57,13 @@ mris_make_surfaces -variablesigma ${VARIABLESIGMA} -white NOWRITE -aseg aseg.hir
 
 # Preserve a copy of these pial surfaces for debugging purposes
 # (Use "cp --preserve=timestamps" to preserve time stamps when copying, so time stamps maintain temporal order of file creation).
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/lh.pial $SubjectDIR/$SubjectID/surf/lh.pial.preT2.pass1
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/rh.pial $SubjectDIR/$SubjectID/surf/rh.pial.preT2.pass1
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/lh.thickness $SubjectDIR/$SubjectID/surf/lh.thickness.preT2.pass1
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/rh.thickness $SubjectDIR/$SubjectID/surf/rh.thickness.preT2.pass1
+# Removed the --preserve=timestamps option because only the owner can do that. KJS 12/6/2018.
+cp  $SubjectDIR/$SubjectID/surf/lh.pial $SubjectDIR/$SubjectID/surf/lh.pial.preT2.pass1
+cp  $SubjectDIR/$SubjectID/surf/rh.pial $SubjectDIR/$SubjectID/surf/rh.pial.preT2.pass1
+cp  $SubjectDIR/$SubjectID/surf/lh.thickness $SubjectDIR/$SubjectID/surf/lh.thickness.preT2.pass1
+cp  $SubjectDIR/$SubjectID/surf/rh.thickness $SubjectDIR/$SubjectID/surf/rh.thickness.preT2.pass1
 
-# Generate pial surfaces with T2 adjustment, still first pass.  
+# Generate pial surfaces with T2 adjustment, still first pass.
 # Same 4 files created as above, but have $outputSuffix1 ("postT2.pass1") appended through use of -output flag.
 # Use -T2 flag (rather than -T2dura), since -T2 is the flag used within recon-all script of FS 5.3 (but -T2 and -T2dura generate same results)
 #For mris_make_surface with correct arguments #Could go from 3 to 2 potentially...
@@ -75,8 +76,8 @@ mris_make_surfaces -nsigma_above 2 -nsigma_below 3 -aseg aseg.hires -filled fill
 mri_surf2surf --s $SubjectID --sval-xyz pial${outputSuffix1} --reg $regII $mridir/orig.mgz --tval-xyz --tval pial --hemi lh
 mri_surf2surf --s $SubjectID --sval-xyz pial${outputSuffix1} --reg $regII $mridir/orig.mgz --tval-xyz --tval pial --hemi rh
 
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/lh.pial $SubjectDIR/$SubjectID/surf/lh.pial${outputSuffix1}.conformed
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/rh.pial $SubjectDIR/$SubjectID/surf/rh.pial${outputSuffix1}.conformed
+cp  $SubjectDIR/$SubjectID/surf/lh.pial $SubjectDIR/$SubjectID/surf/lh.pial${outputSuffix1}.conformed
+cp  $SubjectDIR/$SubjectID/surf/rh.pial $SubjectDIR/$SubjectID/surf/rh.pial${outputSuffix1}.conformed
 
 
 # Deal with FreeSurfer c_ras offset (might be able to simplify this with FS 6.0)
@@ -89,22 +90,22 @@ echo "0 0 1 ""$MatrixZ" >> $mridir/c_ras.mat
 echo "0 0 0 1" >> $mridir/c_ras.mat
 
 mris_convert "$surfdir"/lh.white "$surfdir"/lh.white.surf.gii
-${CARET7DIR}/wb_command -set-structure "$surfdir"/lh.white.surf.gii CORTEX_LEFT 
+${CARET7DIR}/wb_command -set-structure "$surfdir"/lh.white.surf.gii CORTEX_LEFT
 ${CARET7DIR}/wb_command -surface-apply-affine "$surfdir"/lh.white.surf.gii $mridir/c_ras.mat "$surfdir"/lh.white.surf.gii
 ${CARET7DIR}/wb_command -create-signed-distance-volume "$surfdir"/lh.white.surf.gii "$mridir"/T1w_hires.nii.gz "$surfdir"/lh.white.nii.gz
 
 mris_convert "$surfdir"/lh.pial "$surfdir"/lh.pial.surf.gii
-${CARET7DIR}/wb_command -set-structure "$surfdir"/lh.pial.surf.gii CORTEX_LEFT 
+${CARET7DIR}/wb_command -set-structure "$surfdir"/lh.pial.surf.gii CORTEX_LEFT
 ${CARET7DIR}/wb_command -surface-apply-affine "$surfdir"/lh.pial.surf.gii $mridir/c_ras.mat "$surfdir"/lh.pial.surf.gii
 ${CARET7DIR}/wb_command -create-signed-distance-volume "$surfdir"/lh.pial.surf.gii "$mridir"/T1w_hires.nii.gz "$surfdir"/lh.pial.nii.gz
 
 mris_convert "$surfdir"/rh.white "$surfdir"/rh.white.surf.gii
-${CARET7DIR}/wb_command -set-structure "$surfdir"/rh.white.surf.gii CORTEX_RIGHT 
+${CARET7DIR}/wb_command -set-structure "$surfdir"/rh.white.surf.gii CORTEX_RIGHT
 ${CARET7DIR}/wb_command -surface-apply-affine "$surfdir"/rh.white.surf.gii $mridir/c_ras.mat "$surfdir"/rh.white.surf.gii
 ${CARET7DIR}/wb_command -create-signed-distance-volume "$surfdir"/rh.white.surf.gii "$mridir"/T1w_hires.nii.gz "$surfdir"/rh.white.nii.gz
 
 mris_convert "$surfdir"/rh.pial "$surfdir"/rh.pial.surf.gii
-${CARET7DIR}/wb_command -set-structure "$surfdir"/rh.pial.surf.gii CORTEX_RIGHT 
+${CARET7DIR}/wb_command -set-structure "$surfdir"/rh.pial.surf.gii CORTEX_RIGHT
 ${CARET7DIR}/wb_command -surface-apply-affine "$surfdir"/rh.pial.surf.gii $mridir/c_ras.mat "$surfdir"/rh.pial.surf.gii
 ${CARET7DIR}/wb_command -create-signed-distance-volume "$surfdir"/rh.pial.surf.gii "$mridir"/T1w_hires.nii.gz "$surfdir"/rh.pial.nii.gz
 
@@ -150,12 +151,13 @@ mris_make_surfaces -variablesigma ${VARIABLESIGMA} -white NOWRITE -aseg aseg.hir
 mris_make_surfaces -variablesigma ${VARIABLESIGMA} -white NOWRITE -aseg aseg.hires -orig white.deformed -filled filled.hires -wm wm.hires -sdir $SubjectDIR -mgz -T1 T1w_hires.greynorm "$SubjectID" rh
 
 # Preserve a copy of these pial surfaces for debugging purposes
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/lh.pial $SubjectDIR/$SubjectID/surf/lh.pial.preT2.pass2
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/rh.pial $SubjectDIR/$SubjectID/surf/rh.pial.preT2.pass2
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/lh.thickness $SubjectDIR/$SubjectID/surf/lh.thickness.preT2.pass2
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/rh.thickness $SubjectDIR/$SubjectID/surf/rh.thickness.preT2.pass2
+# Removed --preserve=timestamps because only the file's owner ca do this. KJS 12/6/18.
+cp  $SubjectDIR/$SubjectID/surf/lh.pial $SubjectDIR/$SubjectID/surf/lh.pial.preT2.pass2
+cp  $SubjectDIR/$SubjectID/surf/rh.pial $SubjectDIR/$SubjectID/surf/rh.pial.preT2.pass2
+cp  $SubjectDIR/$SubjectID/surf/lh.thickness $SubjectDIR/$SubjectID/surf/lh.thickness.preT2.pass2
+cp  $SubjectDIR/$SubjectID/surf/rh.thickness $SubjectDIR/$SubjectID/surf/rh.thickness.preT2.pass2
 
-# Generate pial surfaces with T2 adjustment, second pass.  
+# Generate pial surfaces with T2 adjustment, second pass.
 # Same 4 files created as above, but have $outputSuffix2 ("postT2.pass2") appended through use of -output flag
 #Could go from 3 to 2 potentially...
 outputSuffix2=".postT2.pass2"
@@ -168,21 +170,21 @@ mri_surf2surf --s $SubjectID --sval-xyz pial${outputSuffix2} --reg $regII $mridi
 
 # Copy other outputs from final call to 'mris_make_surfaces' to their default FS file names
 # (At this point, this could be a 'mv' operation instead).
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/lh.thickness${outputSuffix2} $SubjectDIR/$SubjectID/surf/lh.thickness
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/rh.thickness${outputSuffix2} $SubjectDIR/$SubjectID/surf/rh.thickness
+cp  $SubjectDIR/$SubjectID/surf/lh.thickness${outputSuffix2} $SubjectDIR/$SubjectID/surf/lh.thickness
+cp  $SubjectDIR/$SubjectID/surf/rh.thickness${outputSuffix2} $SubjectDIR/$SubjectID/surf/rh.thickness
 
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/lh.area.pial${outputSuffix2} $SubjectDIR/$SubjectID/surf/lh.area.pial
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/rh.area.pial${outputSuffix2} $SubjectDIR/$SubjectID/surf/rh.area.pial
+cp  $SubjectDIR/$SubjectID/surf/lh.area.pial${outputSuffix2} $SubjectDIR/$SubjectID/surf/lh.area.pial
+cp  $SubjectDIR/$SubjectID/surf/rh.area.pial${outputSuffix2} $SubjectDIR/$SubjectID/surf/rh.area.pial
 
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/lh.curv.pial${outputSuffix2} $SubjectDIR/$SubjectID/surf/lh.curv.pial
-cp --preserve=timestamps $SubjectDIR/$SubjectID/surf/rh.curv.pial${outputSuffix2} $SubjectDIR/$SubjectID/surf/rh.curv.pial
+cp  $SubjectDIR/$SubjectID/surf/lh.curv.pial${outputSuffix2} $SubjectDIR/$SubjectID/surf/lh.curv.pial
+cp  $SubjectDIR/$SubjectID/surf/rh.curv.pial${outputSuffix2} $SubjectDIR/$SubjectID/surf/rh.curv.pial
 
 # Other cleanup
 # Remove some intermediate "Xh.pial.*" files that were generated following the 1st pass,
 # but which no longer correspond to the final pial surfaces (after the 2nd pass)
 rm "$surfdir"/lh.pial.surf.gii "$surfdir"/lh.pial.nii.gz
 rm "$surfdir"/rh.pial.surf.gii "$surfdir"/rh.pial.nii.gz
-# Move all the "ribbon" related files generated following the 1st pass into a dedicated 
+# Move all the "ribbon" related files generated following the 1st pass into a dedicated
 # subdirectory since those also do not correspond to the final ribbon
 cd "$mridir"
 ribbon1Dir=ribbon${outputSuffix1}

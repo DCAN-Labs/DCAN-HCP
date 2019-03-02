@@ -168,7 +168,7 @@ DesignfContrasts=${FEATDir}/design.fts
 
 # An F-test may not always be requested as part of the design.fsf
 ExtraArgs=""
-if [ -e ${DesignfContrasts ] ; then
+if [ -e ${DesignfContrasts} ] ; then
 	ExtraArgs="$ExtraArgs --fcon=${DesignfContrasts}"
 fi
 
