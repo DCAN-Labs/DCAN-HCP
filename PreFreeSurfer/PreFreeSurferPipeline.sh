@@ -149,17 +149,6 @@
 #  Code Start
 # ------------------------------------------------------------------------------
 
-# Copy gold standard Caret7 config file to /tmp/fnl_lab/. Make sure that a symlink to that location exits in ~/.config/
-if [ ! -d /tmp/${USER}/brainvis.wustl.edu ]; then
-    if [ ! -d /tmp/${USER} ]; then
-        mkdir -p /tmp/${USER} 
-    fi
-    cp -rf /home/exacloud/lustre1/fnl_lab/code/internal/pipelines/HCP_generic_srun/brainvis.wustl.edu /tmp/${USER}/
-    chmod g+rw -R /tmp/${USER}
-fi
-
-
-
 # Setup this script such that if any command exits with a non-zero value, the 
 # script itself exits and does not attempt any further processing.
 set -e
