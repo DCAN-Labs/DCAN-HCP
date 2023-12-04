@@ -64,8 +64,8 @@ useT2=`opts_GetOpt1 "--useT2" $@`
 
 # Extra arguments for ANTs based Atlas Registration
 useStudyTemplate=`opts_GetOpt1 "--useStudyTemplate" $@`
-StudyTemplate=`opts_GetOpt1 "--studytemplate" $@`
-StudyTemplateBrain=`opts_GetOpt1 "--studytemplatebrain" $@`
+StudyTemplate=`opts_GetOpt1 "--StudyTemplate" $@`
+StudyTemplateBrain=`opts_GetOpt1 "--StudyTemplateBrain" $@`
 T1wTemplate=`opts_GetOpt1 "--t1template" $@`
 T1wTemplateBrain=`opts_GetOpt1 "--t1templatebrain" $@`
 T1wTemplate2mm=`opts_GetOpt1 "--t1template2mm" $@`
